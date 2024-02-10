@@ -5,6 +5,7 @@ date: 2024/02/10
 date-format: long
 date-modified: "last-modified"
 format: html 
+number-sections: true
 execute: 
   echo: true
   eval: true
@@ -50,9 +51,8 @@ It is important that we take a closer look into how climate change has been affe
 
     -   Geospatial distribution of temperature and rainfall across Singapore
 
-```{=html}
 <!-- -->
-```
+
 -   Confirmatory Data Analysis (CDA)
 
     -   Are the changes in rainfall/ temperature statistically significant? 
