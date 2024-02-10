@@ -12,7 +12,7 @@ execute:
 editor: visual
 ---
 
-# Project Motivation 
+# Project Motivation
 
 As a small, low-lying city-state, Singapore is vulnerable to the consequences of climate change, such as rising sea levels, intense rainfall, dry spells and other extreme weather events. In Jan 2024, the Centre for Climate Research Singapore (CCRS) announced the [Third National Climate Change Study (V3)](https://www.mss-int.sg/v3-climate-projections) which provided a preview into potential scenarios of our future based on low, medium, and high global greenhouse gas emissions. Very hot days will become more frequent. Extreme daily rainfall is projected to intensify. The mean sea level around Singapore is projected to rise up to 1.15m by end century, and up to around 2m by 2150 under the high emissions scenario.
 
@@ -20,7 +20,7 @@ Adapting to the effects of climate change is a national priority and Singapore h
 
 It is important that we take a closer look into how climate change has been affecting Singapore, by understanding the trends in our daily temperatures, rainfall and sea level rise over the years and utilise historical data to forecast future climate data. This will allow us to ascertain the severity of the impact of climate change and provide guidance as to whether Singapore will need to more urgently develop ways to mitigate and adapt.
 
-# Issues to Address 
+# Issues to Address
 
 -   What are the trends in daily temperature across the years?
 
@@ -34,7 +34,7 @@ It is important that we take a closer look into how climate change has been affe
 
 -   Would certain regions within Singapore experience a greater increase in temperature and precipitation as compared to other areas?
 
-# Approach 
+# Approach
 
 -   Data Preparation
 
@@ -65,7 +65,7 @@ It is important that we take a closer look into how climate change has been affe
 
     -   Time-series forecasting of temperature, rainfall and wind speed in the next 10 to 30 years
 
-# Possible Ideas for Shiny Dashboard 
+# Possible Ideas for Shiny Dashboard
 
 -   Temperature trend across the years
 
@@ -75,21 +75,17 @@ It is important that we take a closer look into how climate change has been affe
 
     -   Interactivity: allow user to select a range of years, for whole Singapore or a particular location (based on weather stations)
 
--   CDA Analysis
+-   Projections for temperature and rain
 
-    -   One way anova on temperature by weather stations?
+    ![Draft Shiny Dashboard](images/draftdashboard.png)
 
-    -   One way anova on rainfall by weather stations?
-
--    Projections for temperature and rain
-
-# Relevant Work and References 
+# Relevant Work and References
 
 -   <https://climateknowledgeportal.worldbank.org/country/singapore>
 
 -   <https://www.nccs.gov.sg/> 
 
--    <https://iopscience.iop.org/article/10.1088/1757-899X/407/1/012154/pdf>
+-   <https://iopscience.iop.org/article/10.1088/1757-899X/407/1/012154/pdf>
 
 -   <https://www.sciencedirect.com/science/article/pii/S266682702100102X>
 
