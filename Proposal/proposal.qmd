@@ -1,0 +1,96 @@
+---
+title: "Project Proposal"
+author: "StormTroopers"
+date: 2024/02/10
+date-format: long
+date-modified: "last-modified"
+format: html 
+execute: 
+  echo: true
+  eval: true
+  warning: false
+editor: visual
+---
+
+# Project Motivation 
+
+As a small, low-lying city-state, Singapore is vulnerable to the consequences of climate change, such as rising sea levels, intense rainfall, dry spells and other extreme weather events. In Jan 2024, the Centre for Climate Research Singapore (CCRS) announced the [Third National Climate Change Study (V3)](https://www.mss-int.sg/v3-climate-projections) which provided a preview into potential scenarios of our future based on low, medium, and high global greenhouse gas emissions. Very hot days will become more frequent. Extreme daily rainfall is projected to intensify. The mean sea level around Singapore is projected to rise up to 1.15m by end century, and up to around 2m by 2150 under the high emissions scenario.
+
+Adapting to the effects of climate change is a national priority and Singapore has started to integrate long-term adaptation planning into national policies for key sectors including food security, public health, infrastructure resilience, flood risks, water security, coastal line and biodiversity, as indicated in its [intended Nationally Determined Contribution](https://unfccc.int/sites/default/files/NDC/2022-06/Singapore%20INDC.pdf) to the United Nations Framework Convention on Climate Change (UNFCCC).
+
+It is important that we take a closer look into how climate change has been affecting Singapore, by understanding the trends in our daily temperatures, rainfall and sea level rise over the years and utilise historical data to forecast future climate data. This will allow us to ascertain the severity of the impact of climate change and provide guidance as to whether Singapore will need to more urgently develop ways to mitigate and adapt.
+
+# Issues to Address 
+
+-   What are the trends in daily temperature across the years?
+
+-   What are the trends in rainfall across the years?
+
+-   What are the trends in wind speed across the years?
+
+-   Which areas (based on weather station location) are hotter and have more rain?
+
+-   What is the future trend of temperature and rainfall? Is Singapore really going to get hotter and experience more rain?
+
+-   Would certain regions within Singapore experience a greater increase in temperature and precipitation as compared to other areas?
+
+# Approach 
+
+-   Data Preparation
+
+    -   To make use of daily weather data from 1983 to 2023
+
+    -   Downloaded from [weather.gov.sg](https://www.weather.gov.sg/home/)
+
+-   Exploratory Data Analysis (EDA)
+
+    -   Trend of mean temperature, rainfall, and wind speed across years
+
+    -   Trend of mean monthly temperature, rainfall, and wind speed
+
+    -   Geospatial distribution of temperature and rainfall across Singapore
+
+```{=html}
+<!-- -->
+```
+-   Confirmatory Data Analysis (CDA)
+
+    -   Are the changes in rainfall/ temperature statistically significant? 
+
+    -   Are there really certain months “drier” or “wetter”/ “hotter” or “cooler”?
+
+    -   Are there certain locations “drier” or “wetter”/ “hotter” or “cooler”?
+
+-   Forecasting
+
+    -   Time-series forecasting of temperature, rainfall and wind speed in the next 10 to 30 years
+
+# Possible Ideas for Shiny Dashboard 
+
+-   Temperature trend across the years
+
+    -   Interactivity: allow user to select a range of years, for whole Singapore or a particular location (based on weather stations)
+
+-   Rain fall trend across the years
+
+    -   Interactivity: allow user to select a range of years, for whole Singapore or a particular location (based on weather stations)
+
+-   CDA Analysis
+
+    -   One way anova on temperature by weather stations?
+
+    -   One way anova on rainfall by weather stations?
+
+-    Projections for temperature and rain
+
+# Relevant Work and References 
+
+-   <https://climateknowledgeportal.worldbank.org/country/singapore>
+
+-   <https://www.nccs.gov.sg/> 
+
+-    <https://iopscience.iop.org/article/10.1088/1757-899X/407/1/012154/pdf>
+
+-   <https://www.sciencedirect.com/science/article/pii/S266682702100102X>
+
+-   <https://arxiv.org/pdf/1302.6613.pdf>

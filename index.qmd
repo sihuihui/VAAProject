@@ -1,11 +1,17 @@
 ---
-title: "VAAProject - test"
+title: "Rain, Hail or Shine: Unveiling Mysteries of the Sky"
+author: StormTroopers
+date: 2024/02/10
+date-format: long
+date-modified: "last-modified"
+format: html 
+execute: 
+  echo: true
+  eval: true
+  warning: false
+editor: visual
 ---
 
-This is a Quarto website.
+Welcome to StormTroopers' Project website! 
 
-To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
 
-```{r}
-1 + 1 
-```
