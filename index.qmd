@@ -1,8 +1,11 @@
 ---
 title: "Rain, Hail or Shine: Unveiling Mysteries of the Sky"
+title-block-style: none
 format: 
   html: 
     css: styles.css
+    grid: 
+      body-width: 1200px
 page-layout: full
 toc: false 
 sidebar: false 
@@ -27,3 +30,4 @@ number-sections: false
 
 
 # Poster 
+
