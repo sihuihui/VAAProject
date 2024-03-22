@@ -27,8 +27,6 @@ It is important that we take a closer look into how climate change has been affe
 
 -   What are the trends in rainfall across the years?
 
--   What are the trends in wind speed across the years?
-
 -   Which areas (based on weather station location) are hotter and have more rain?
 
 -   What is the future trend of temperature and rainfall? Is Singapore really going to get hotter and experience more rain?
@@ -39,16 +37,16 @@ It is important that we take a closer look into how climate change has been affe
 
 -   Data Preparation
 
-    -   To make use of daily weather data from 1983 to 2023
+    -   To make use of monthly weather data from 2014 to 2023
 
     -   Downloaded from [weather.gov.sg](https://www.weather.gov.sg/home/)
 
 -   Exploratory Data Analysis (EDA)
 
-    -   Trend of mean temperature, rainfall, and wind speed across years
+    -   Trend of monthly temperature, and rainfall across years
 
-    -   Trend of mean monthly temperature, rainfall, and wind speed
-
+    -   Trend of mean monthly temperature and rainfall
+    
     -   Geospatial distribution of temperature and rainfall across Singapore
 
 <!-- -->

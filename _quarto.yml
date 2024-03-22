@@ -2,10 +2,11 @@ project:
   type: website
 
 website:
-  title: "StormTroopers"
-  favicon: "Logo.png"
+  title: "STORMTROOPERS"
+  favicon: "logo.png"
   navbar:
-    logo: "Logo.png"
+    logo: "logo.png"
+    background: "#293040"
     left:
       - href: index.qmd
         text: Home
@@ -14,7 +15,9 @@ website:
 
 format:
   html:
-    theme: cosmo
+    theme: 
+    - cosmo
+    - style.scss
     css: styles.css
     toc: true
 

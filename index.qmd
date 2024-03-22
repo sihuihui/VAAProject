@@ -1,17 +1,16 @@
 ---
 title: "Rain, Hail or Shine: Unveiling Mysteries of the Sky"
-author: StormTroopers
-date: 2024/02/10
-date-format: long
-date-modified: "last-modified"
-format: html 
-execute: 
-  echo: true
-  eval: true
-  warning: false
-editor: visual
+format: 
+  html: 
+    css: styles.css
+page-layout: full
+toc: false 
+sidebar: false 
+number-sections: false
 ---
 
-Welcome to StormTroopers' Project website! 
+![](images/coverpage-01.png)
 
+Welcome to StormTroopers' Project website!
 
+------------------------------------------------------------------------
