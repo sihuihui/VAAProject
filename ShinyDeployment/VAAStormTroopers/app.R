@@ -173,11 +173,35 @@ ui <- page_navbar(
                   ),
                   card_body(plotOutput(outputId = "stationplot")))
               ))),
+
+  # Exploratory Data Analysis
   
-  nav_panel(title = "Comparison Sandbox", p("Second page content.")),
+  nav_panel(title = "Exploratory Data Analysis", 
+            nav_panel("Overview of Temperature",
+                      layout_columns(
+                        col_widths = c(6,6,6,6),
+                        row_heights = c(2,2), 
+                        
+                        card(card_header("Temperature Trends from 2014 to 2023")
+                        ), 
+                        
+                        card(card_header("Detailed Temperature Trends from 2014 to 2023")
+                        ),
+                        
+                        card(card_header("Distribution of Temperature from 2014 to 2023")
+                        ), 
+                        
+                        card(card_header("Changes in Monthly Rainfall")
+                        )
+                      )
+                      ),
+            nav_panel("Overview of Rainfall"),
+            nav_panel("Correlation Between Variables"),
+            nav_panel("Comparisons Between Stations and Variables")
+            ), # end of EDA 
   
   # comparsion analysis
-  nav_panel(title = "Comparison Analysis", 
+  nav_panel(title = "Confirmatory Data Analysis", 
             navset_card_tab(
               sidebar = sidebar("Please make the following selections",
                                 selectInput(inputId = "cda_variable",
@@ -218,8 +242,7 @@ ui <- page_navbar(
                         card_body(plotOutput("cda_MonthsPlot"))), 
               nav_panel("Comparison Between Stations",
                         card_body(plotOutput("cda_StationsPlot")))
-              
-              
+
             )), # End of Comparison Analysis 
   nav_menu(
     title = "Forecasting",
