@@ -1,7 +1,8 @@
 pacman::p_load(tidyverse, shiny, bslib, 
                lubridate, DT, ggplot2, plotly, ggthemes, hrbrthemes, timetk, modeltime, tidymodels, 
                xgboost, recipes, parsnip, workflows, patchwork, thematic, showtext, glue, bsicons,
-               tmap, sf,terra, gstat, automap, ggstatsplot
+               tmap, sf,terra, gstat, automap, ggstatsplot, ggridges,ggrepel,ggsignif,gifski, 
+               gganimate,ggiraph,magick,car
 )
 
 weatherdata <-read_rds("data/weather_data_imputed.rds")
@@ -17,6 +18,8 @@ weatherdata_cda <- weatherdata %>%
   mutate(MONTH = month(tdate),
          YEAR = year(tdate))
 
+
+
 ##### Geospatial data #######
 wdata_sf <- read_rds("data/weatherdata_wstations.rds")
 
@@ -24,6 +27,37 @@ mpsz2019 <- st_read(dsn = "data/geospatial",
                     layer = "MPSZ-2019") %>% 
   st_transform(crs = 3414)
 ##### Geospatial data #######
+
+########### EDA data ################
+rainfall_data_year <- read_csv("data/rainfall_data_year.csv")
+rainfall_data_month <- read_csv("data/rainfall_data_month.csv")
+rainfall_data_stn <- read_csv("data/rainfall_data_stn.csv")
+temp_year <- read_csv("data/temp_year.csv")
+temp_month <- read_csv("data/temp_month.csv")
+temp_stn <- read_csv("data/temp_stn.csv")
+combined_data <- read_csv("data/combined_data.csv")
+combined_data2 <- read_csv("data/combined_data2.csv")
+combined_data3 <- read_csv("data/combined_data3.csv")
+########### EDA data ################
+
+###### hline values for cycle plots ########
+
+hline.data <- rainfall_data_month %>%
+  group_by(month) %>%
+  summarise(avgvalue = mean(monthly_rainfall))
+
+hline_mean_temp.data <- temp_month %>%
+  group_by(year) %>%
+  summarise(avgvalue = mean(meantemp))
+
+hline_max_temp.data <- temp_month %>%
+  group_by(year) %>%
+  summarise(avgvalue = mean(maxtemp))
+
+hline_min_temp.data <- temp_month %>%
+  group_by(year) %>%
+  summarise(avgvalue = mean(mintemp))
+###### hline values for cycle plots ########
 
 ####### Aesthetics of the dashboard ###################
 # Builds theme object to be supplied to ui
@@ -176,41 +210,165 @@ ui <- page_navbar(
 
   # Exploratory Data Analysis
   
-  nav_panel(title = "Exploratory Data Analysis", 
-            nav_panel("Overview of Temperature",
+  nav_panel(title = "Exploring Singapore's Weather",
+            navset_card_tab(
+              
+              nav_panel("By Years",
+                        layout_columns(
+                          col_widths = c(6,6),
+
+                          #card(card_body(plotlyOutput("eda_tempoverview"))
+                          #), 
+                  
+                          card(
+                            navset_bar(
+                              nav_panel("Temperature",
+                                        layout_sidebar(
+                                          sidebar = sidebar(
+                                            selectInput(inputId = "eda_variable1",
+                                                        label = "Variable to display",
+                                                        choices = c("Mean Temperature" = "meantemp",
+                                                                    "Maximum Temperature" = "maxtemp",
+                                                                    "Minimum Temperature" = "mintemp"),
+                                                        selected = "meantemp")),
+                                          card_body(plotOutput("eda_tempdistribution"))
+                                        )),
+                              nav_panel("Rainfall",
+                                card_body(plotOutput("eda_rfdistribution"))
+                              ))), 
+                          
+                          card(
+                            navset_tab(
+                              nav_panel("Temperature",
+                                card_body(plotlyOutput("eda_tempdetailed"))
+                              ),
+                              nav_panel("Rainfall",
+                                        card_body(plotlyOutput("eda_rfdetailed")))
+                            )),
+                          )),
+                        
+            nav_panel("By Months",
                       layout_columns(
                         col_widths = c(6,6,6,6),
                         row_heights = c(2,2), 
-                        
-                        card(card_header("Temperature Trends from 2014 to 2023")
-                        ), 
-                        
-                        card(card_header("Detailed Temperature Trends from 2014 to 2023")
+
+                        card(card_header("Rainfall Fluctuations by Months"),
+                             card_body(plotOutput("eda_rfmonthly"))
                         ),
                         
-                        card(card_header("Distribution of Temperature from 2014 to 2023")
-                        ), 
-                        
-                        card(card_header("Changes in Monthly Rainfall")
+                        card(card_header("Temperature Fluctuations by Months"),
+                             #full_screen = TRUE,
+                             #fill = TRUE,
+                             #height = 500,
+                             navset_tab(
+                               nav_panel("Mean Temperature",
+                                         card_body(plotOutput("eda_meantempmonthly"),
+                                                   fillable = TRUE,
+                                                   fill = TRUE)),
+                               nav_panel("Maximum Temperature",
+                                         card_body(plotOutput("eda_maxtempmonthly"),
+                                                   fillable = TRUE,
+                                                   fill = TRUE)),
+                               nav_panel("Minimum Temperature",
+                                         card_body(plotOutput("eda_mintempmonthly"),
+                                                   fillable = TRUE,
+                                                   fill = TRUE))
+                             )
                         )
-                      )
-                      ),
-            nav_panel("Overview of Rainfall"),
-            nav_panel("Correlation Between Variables"),
-            nav_panel("Comparisons Between Stations and Variables")
-            ), # end of EDA 
+                      )),
+            
+            nav_panel("By Stations",
+                      layout_columns(
+                        col_widths = c(6,6),
+                        card(
+                          card_body(plotlyOutput(outputId = "plot24"))),
+                        
+                        card(
+                          card_body(plotlyOutput(outputId = "plot25"))
+                        )
+                          
+                        )),
+            
+            nav_panel("Comparisons Between Stations and Variables",
+                      layout_columns(
+                        col_widths = c(6,6),
+                        
+                        card("Plot 1",
+                          layout_sidebar(
+                            sidebar = sidebar(
+                              selectInput(
+                                inputId = "compare_variable1",
+                                label = "Select a Station",
+                                choices = c("Admiralty" = "Admiralty",
+                                            "Ang Mo Kio" = "Ang Mo Kio",
+                                            "Changi" = "Changi", 
+                                            "Choa Chu Kang (South)" = "Choa Chu Kang (South)",
+                                            "Clementi" = "Clementi",
+                                            "East Coast Parkway" = "East Coast Parkway",
+                                            "Jurong Island" = "Jurong Island",
+                                            "Jurong (West)" = "Jurong (West)",
+                                            "Newton" = "Newton",
+                                            "Pasir Panjang" = "Pasir Panjang", 
+                                            "Sentosa Island"  = "Sentosa Island",
+                                            "Tai Seng" = "Tai Seng",
+                                            "Tuas South" = "Tuas South"),
+                                selected = "Admiralty"),
+                              
+                              selectInput(inputId = "compare_variable2",
+                                          label = "Variable to display",
+                                          choices = c("Mean Temperature" = "mean_monthly_temperature",
+                                                      "Maximum Temperature" = "max_monthly_temperature",
+                                                      "Minimum Temperature" = "min_monthly_temperature",
+                                                      "Total Rainfall" = "monthly_rainfall"),
+                                          selected = "mean_monthly_temperature")),
+
+                            card_body(plotlyOutput("compare_weather1"))
+                          )), 
+                        
+                        card("Plot 2",
+                             layout_sidebar(
+                               sidebar = sidebar(
+                                 selectInput(
+                                   inputId = "compare_variable1",
+                                   label = "Select a Station",
+                                   choices = c("Admiralty" = "Admiralty",
+                                               "Ang Mo Kio" = "Ang Mo Kio",
+                                               "Changi" = "Changi", 
+                                               "Choa Chu Kang (South)" = "Choa Chu Kang (South)",
+                                               "Clementi" = "Clementi",
+                                               "East Coast Parkway" = "East Coast Parkway",
+                                               "Jurong Island" = "Jurong Island",
+                                               "Jurong (West)" = "Jurong (West)",
+                                               "Newton" = "Newton",
+                                               "Pasir Panjang" = "Pasir Panjang", 
+                                               "Sentosa Island"  = "Sentosa Island",
+                                               "Tai Seng" = "Tai Seng",
+                                               "Tuas South" = "Tuas South"),
+                                   selected = "Changi"),
+                                 
+                                 selectInput(inputId = "compare_variable4",
+                                             label = "Variable to display",
+                                             choices = c("Mean Temperature" = "mean_monthly_temperature",
+                                                         "Maximum Temperature" = "max_monthly_temperature",
+                                                         "Minimum Temperature" = "min_monthly_temperature",
+                                                         "Total Rainfall" = "monthly_rainfall"),
+                                             selected = "mean_monthly_temperature")),
+                               card_body(plotlyOutput("compare_weather2"))
+                             )), 
+                      ))
+            )), # end of EDA 
   
-  # comparsion analysis
+  # confirmatory data analysis
   nav_panel(title = "Confirmatory Data Analysis", 
             navset_card_tab(
-              sidebar = sidebar("Please make the following selections",
+              sidebar = sidebar("Make the following selections",
                                 selectInput(inputId = "cda_variable",
                                             label = "Variable to compare",
                                             choices = c("Mean Temperature" = "mean_monthly_temperature",
                                                         "Maximum Temperature" = "max_monthly_temperature",
                                                         "Minimum Temperature" = "min_monthly_temperature",
                                                         "Total Rainfall" = "monthly_rainfall"),
-                                            selected = "MEAN_TEMP"), 
+                                            selected = "mean_monthly_temperature"), 
                                 
                                 selectInput(inputId = "cda_testtype",
                                             label = "Type of Statisitcal Approach",
@@ -223,7 +381,7 @@ ui <- page_navbar(
                                 
                                 sliderInput(inputId = "cda_conflevel",
                                             label = "Confidence Level",
-                                            min = 0.95,
+                                            min = 0.90,
                                             max = 0.99,
                                             value = 0.95,
                                             step = 0.01), 
@@ -243,7 +401,7 @@ ui <- page_navbar(
               nav_panel("Comparison Between Stations",
                         card_body(plotOutput("cda_StationsPlot")))
 
-            )), # End of Comparison Analysis 
+            )), # End of CDA 
   nav_menu(
     title = "Forecasting",
     nav_panel(title = "Exponential Smoothing",
@@ -444,6 +602,310 @@ server <- function(input, output){
       geom_line()
   })
   ############# Plot in Overview Page Server End #######################
+  
+  ############# EDA Server Start ########################
+  
+  ### Temperature 
+  
+  #output$eda_tempoverview <- renderPlotly({
+    
+    #p4 <- ggplot(combined_data, 
+                 #aes(x = year, 
+                     #y = value, 
+                     #color = temperature_type)) +
+      #geom_line() +
+      #labs(title = "Temperature Trends from 2014 to 2023",
+           #y = "Temperature (°C)",
+           #x = "Year",
+           #color="Temperature Type") +
+      #scale_x_continuous(breaks = seq(2014, 2023, 1)) +
+      #scale_color_manual(values = c("turquoise", "violetred2", "steelblue2"), 
+                         #labels = c("Mean", "Max", "Min")) +
+      #theme_minimal() +
+      #theme(axis.text.x = element_text(angle = 90, hjust = 1))
+    
+    
+    #p4 <- ggplotly(p4, tooltip="all") %>%
+      #layout(legend = list(x = 0.6, y = 0.2))
+    
+    #p4
+  #})
+  
+  output$eda_tempdistribution <- renderPlot({
+    
+    ggplot(temp_month, 
+           aes_string(x = input$eda_variable1, 
+                      y = "as.factor(year)", 
+                      fill = "0.5 - abs(0.5-stat(ecdf))")) +
+      stat_density_ridges(geom = "density_ridges_gradient", 
+                          calc_ecdf = TRUE) +
+      scale_fill_viridis_c(name = "Tail probability",
+                           direction = -1,
+                           option="turbo")+
+      theme_ridges()+
+      scale_color_discrete(name = "Year") +
+      labs(title=paste0("Distribution of ", input$eda_variable1," from 2014 to 2023"),
+           y="Year",
+           x="Temperature (°C)")
+    
+  })
+  
+  output$eda_tempdetailed <- renderPlotly({
+    combined_data2 <- reshape2::melt(temp_month, id.vars = c("year", "month"), variable.name = "temperature_type")
+    
+    p17 <- ggplot(combined_data2, aes(x = month, 
+                                      y = value,
+                                      color = temperature_type)) +
+      geom_line() +
+      facet_wrap(~ year,scales = "free_x")+
+      labs(title = "Detailed Temperature Trends from 2014 to 2023",
+           y = "Temperature (°C)",
+           x = "Month",
+           color = "Temperature Type") +
+      scale_x_continuous(breaks = seq(1,12, 1)) +
+      scale_color_manual(values = c("turquoise", "violetred2", "steelblue2"), 
+                         labels = c("Mean", "Max", "Min")) +
+      theme_minimal() +
+      theme(panel.border = element_rect(color = "lightgrey",linetype = "dashed", fill = NA, size = 1))
+    
+    p17 <- ggplotly(p17, tooltip = "all") %>%
+      layout(legend = list(x = 0.6, y = 0.08))
+    
+    p17
+  })
+  
+  output$eda_meantempmonthly<- renderPlot({
+    
+    ggplot() +
+      geom_line(data = temp_month,
+                aes(x = as.factor(month),
+                    y = meantemp,
+                    group = year,
+                    colour = as.factor(year)))+
+      geom_hline(aes(yintercept=avgvalue),
+                 data=hline_mean_temp.data,
+                 linetype=6,
+                 colour="red",
+                 size=0.5)+
+      facet_wrap(~year,scales = "free_x")+
+      labs(axis.text.x=element_blank(),
+           title = "Mean temperature by year from 2014 to 2023")+
+      xlab("")+
+      ylab("Degrees (°C)")+
+      scale_color_discrete(name = "Year")+
+      theme_tufte(base_family = "Helvetica",
+                  base_size = 7)+
+      theme(legend.position = "none") 
+  })
+  
+  output$eda_maxtempmonthly <- renderPlot({
+    
+    ggplot() +
+      geom_line(data = temp_month,
+                aes(x = as.factor(month),
+                    y = maxtemp,
+                    group = year,
+                    colour = as.factor(year)))+
+      geom_hline(aes(yintercept=avgvalue),
+                 data=hline_max_temp.data,
+                 linetype=6,
+                 colour="red",
+                 size=0.5)+
+      facet_wrap(~year,scales = "free_x")+
+      labs(axis.text.x=element_blank(),
+           title = "Max temperature by year from 2014 to 2023")+
+      xlab("")+
+      ylab("Degrees (°C)")+
+      scale_color_discrete(name = "Year")+
+      theme_tufte(base_family = "Helvetica",
+                  base_size = 7)+
+      theme(legend.position = "none")
+    
+  })
+
+  output$eda_mintempmonthly <- renderPlot({
+    ggplot() +
+      geom_line(data = temp_month,
+                aes(x = as.factor(month),
+                    y = mintemp,
+                    group = year,
+                    colour = as.factor(year)))+
+      geom_hline(aes(yintercept=avgvalue),
+                 data=hline_min_temp.data,
+                 linetype=6,
+                 colour="red",
+                 size=0.5)+
+      facet_wrap(~year,scales = "free_x")+
+      labs(axis.text.x=element_blank(),
+           title = "Min temperature by year from 2014 to 2023")+
+      xlab("")+
+      ylab("Degrees (°C)")+
+      scale_color_discrete(name = "Year")+
+      theme_tufte(base_family = "Helvetica",
+                  base_size = 7)+
+      theme(legend.position = "none")
+    
+  })
+
+  ### Rainfall 
+  output$eda_rfoverview <- renderPlotly({
+    ggplot(rainfall_data_year,
+           aes(y=yearly_rainfall,
+               x = year))+
+      geom_point()+
+      geom_line() +
+      labs(title="Rainfall from 2014 to 2023",
+           y = "Rainfall volume (mm)",
+           x = "Year") +
+      scale_x_continuous(breaks =seq(2014,2023,1)) +
+      theme_minimal() +
+      theme(axis.text.x=element_text(angle=90,hjust=1),panel.spacing.y = unit(5,"lines"),legend.position = "none")
+  })
+  
+  output$eda_rfdetailed <- renderPlotly({
+    ggplotly(ggplot(rainfall_data_month,
+                    aes(y=monthly_rainfall,
+                        x = as.factor(month),
+                        fill = as.factor(year))) +
+               geom_bar(stat = "identity")+
+               facet_wrap(~year, scales = "free_x") +
+               labs(title="Monthly rainfall each year from 2014 to 2023",
+                    y = "Rainfall volume (mm)",
+                    x = "Month") +
+               theme_minimal()+
+               theme(panel.spacing.y = unit(0.3, "lines"),text=element_text(size=10),
+                     legend.position = "none")+
+               scale_fill_discrete(name = "Year"))
+  })
+  
+  output$eda_rfdistribution <- renderPlot({
+    ggplot(rainfall_data_month, 
+           aes(x = monthly_rainfall,
+               y = as.factor(year), 
+               fill = 0.5 - abs(0.5-stat(ecdf)))) +
+      stat_density_ridges(geom = "density_ridges_gradient", 
+                          calc_ecdf = TRUE) +
+      scale_fill_viridis_c(name = "Tail probability",
+                           direction = -1,
+                           option="turbo")+
+      theme_ridges()+
+      labs(title="Distribution of Monthly Rainfall from 2014 to 2023",
+           y="Year",
+           x="Rainfall Volume (mm)")
+  })
+  
+  output$eda_rfmonthly <- renderPlot({
+    ggplot() +
+      geom_line(data = rainfall_data_month,
+                aes(x = year,
+                    y = monthly_rainfall,
+                    group = month,
+                    colour = as.factor(month)))+
+      geom_hline(aes(yintercept=avgvalue),
+                 data=hline.data,
+                 linetype=6,
+                 colour="red",
+                 size=0.5)+
+      facet_wrap(~month,scales = "free_x")+
+      labs(title = "Rainfall by month from 2014 to 2023",
+           colour = "Month") +
+      xlab("Year")+
+      ylab("Rainfall volume (mm)")+
+      theme_tufte(base_family = "Helvetica")+ 
+      theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 1),
+            legend.position = "none")
+    
+  })
+
+  
+  ### By Stations 
+  output$plot24 <- renderPlotly({
+    
+    ggplotly(ggplot(rainfall_data_stn,
+                    aes(y=yearly_rainfall,
+                        x = year,
+                        group = station,
+                        color = station)) +
+               geom_line() +
+               facet_wrap(~station,scales = "free_x") +
+               labs(title="Yearly rainfall across weather stations from 2014 to 2023",
+                    y = "Rainfall volume (mm)",
+                    x = "Year") +
+               theme_minimal() +
+               theme(axis.text.x=element_text(angle=90,hjust=1),
+                     panel.spacing.y = unit(0.05,"lines"),
+                     legend.position = "none")) %>%
+      layout(width = 600, height = 700)
+    
+  })
+  
+  output$plot25 <- renderPlotly({
+    
+    p29 <- ggplot(combined_data3, aes(x = year, 
+                                      y = value,
+                                      color = temperature_type)) +
+      geom_line() +
+      facet_wrap(~ station,scales = "free_x")+
+      labs(title = "Detailed Temperature Trends across stations from 2014 to 2023",
+           y = "Temperature (°C)",
+           x = "Year",
+           color = "Temperature Type") +
+      scale_x_continuous(breaks = seq(2014,2023, 1)) +
+      scale_color_manual(values = c("turquoise", "violetred2", "steelblue2"), 
+                         labels = c("Mean", "Max", "Min")) +
+      theme_minimal() +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1),
+            panel.border = element_rect(color = "lightgrey",linetype = "dashed", fill = NA, size = 1))
+    
+    p29 <- ggplotly(p29, tooltip = "all",width = 800, height = 600)%>%
+      layout(legend = list(x = 0.7, y = 0))
+    
+    p29
+  })
+  
+  
+  
+  ### Comparison 
+  selected_weatherstation1 <- reactive({ 
+    weatherdata %>%
+      filter(station %in% input$compare_variable1) %>%
+      select(date = tdate, value = input$compare_variable2)
+  }) 
+  
+  output$compare_weather1 <- renderPlotly({
+    req(selected_weatherstation1())
+    
+    w1 <- ggplot(data = selected_weatherstation1(),
+           aes_string(x = "date", y = "value")) +
+      geom_line()
+   
+    w1 <- ggplotly(w1, tooltip = "all") %>%
+      layout(legend = list(x = 0.6, y = 0.08))
+    
+    w1
+  })
+  
+  selected_weatherstation2 <- reactive({ 
+    weatherdata %>%
+      filter(station %in% input$compare_variable1) %>%
+      select(date = tdate, value = input$compare_variable2)
+  }) 
+  
+  output$compare_weather2 <- renderPlotly({
+    req(selected_weatherstation2())
+    
+    w2 <- ggplot(data = selected_weatherstation2(),
+                 aes_string(x = "date", y = "value")) +
+      geom_line()
+    
+    w2 <- ggplotly(w2, tooltip = "all") %>%
+      layout(legend = list(x = 0.6, y = 0.08))
+    
+    w2
+  })
+  
+  
+  ############# EDA Server End ########################
   
   ############# Comparison Analysis Server Start ########################
   weatherdata_cda_comparison <- eventReactive(input$cda_plotdata, {
