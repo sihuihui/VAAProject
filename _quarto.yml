@@ -8,11 +8,12 @@ website:
     logo: "logo.png"
     background: "#293040"
     left:
-      - href: index.qmd
-        text: Home
-      - href: "Proposal/proposal.qmd"
-        text: Project Proposal
-
+      - text: Home
+        href: index.qmd
+      - text: Project Proposal
+        href: "Proposal/proposal.qmd"
+      - text: Meeting Minutes
+        href: Meeting_Minutes/meeting_minutes.html
 format:
   html:
     theme: 
