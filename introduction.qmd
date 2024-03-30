@@ -1,5 +1,5 @@
 ---
-title: "Introduction"
+title: "Rain or Shine: Unveiling The Mysteries of Singapore Weather"
 format:
   html: 
     theme: cosmo
@@ -11,6 +11,10 @@ toc: true
 sidebar: false 
 number-sections: false
 ---
+
+# Introduction
+
+# 1. The Motivation
 
 As a small, low-lying city-state, Singapore is vulnerable to the effects of climate change which has brought about more extreme weather patterns - rising sea levels, dry spells and intense rainfall which at times can lead to flash floods.
 
@@ -28,3 +32,21 @@ In Jan 2024, the Centre for Climate Research Singapore (CCRS) announced the [Thi
 3.  The mean sea level around Singapore is projected to rise up to 1.15m by end century, and up to around 2m by 2150 under the high emissions scenario.
 
 It is important that we better understand how climate change has been affecting Singapore, by understanding the trends in our daily temperatures and rainfall over the years, and utilise historical data to forecast future climate data. It will provide guidance on whether and how Singapore will need to urgently develop ways to mitigate and adapt.
+
+# 2. Objectives
+
+Our group utilised data from [weather.gov.sg](https://www.weather.gov.sg/home/) to carry out the analysis of temperature and rainfall over a 10-year period from 2014 to 2023 and across 13 different weather stations. Our aim was to:
+
+-   Understand the trend of mean, maximum, minimum temperature and rainfall across the years, months and weather stations.
+
+-   Understand if the changes, if any, in mean, maximum, minimum temperature and rainfall across the years were statistically significant.
+
+-   Understand if certain months were drier or wetter/hotter or cooler than others.
+
+-   Understand if certain locations (weather stations) were drier or wetter/hotter or cooler than others.
+
+-   To conduct a time-series forecasting of temperature and rainfall in the next 10 years
+
+# 3. The Application
+
+The group showcased our discoveries through our [Shiny Application](ShinyApp/ShinyApp.html) to enable users such as analysts and policymakers to grasp the impacts of climate change on Singapore. Users can gain insights from the historical trends of temperatures and rainfall, and the forecasts of our future climate conditions.

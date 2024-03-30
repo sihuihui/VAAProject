@@ -15,5 +15,3 @@ number-sections: false
 ::: column-screen
 ![](images/coverpage-01.png)
 :::
-
-# 

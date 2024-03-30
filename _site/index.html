@@ -69,7 +69,6 @@ ul.task-list li input[type="checkbox"] {
 }</script>
 
 
-<link rel="stylesheet" href="styles.css">
 </head>
 
 <body class="nav-fixed">
@@ -97,12 +96,56 @@ ul.task-list li input[type="checkbox"] {
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./Proposal/proposal.html"> 
-<span class="menu-text">Project Proposal</span></a>
+    <a class="nav-link" href="./introduction.html"> 
+<span class="menu-text">Introduction</span></a>
   </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-documentation" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Documentation</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-documentation">    
+        <li>
+    <a class="dropdown-item" href="./Proposal/proposal.html">
+ <span class="dropdown-text">Project Proposal</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./Meeting_Minutes/meeting_minutes.html">
+ <span class="dropdown-text">Meeting Minutes</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-analysis" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Analysis</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-analysis">    
+        <li>
+    <a class="dropdown-item" href="./Analysis/Dataprep.html">
+ <span class="dropdown-text">Data Preparation</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./Analysis/EDA.html">
+ <span class="dropdown-text">Exploratory Data Analysis</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./Analysis/CDA.html">
+ <span class="dropdown-text">Confirmatory Data Analysis</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./Analysis/Forecasting.html">
+ <span class="dropdown-text">Forecasting</span></a>
+  </li>  
+    </ul>
+  </li>
   <li class="nav-item">
-    <a class="nav-link" href="./Meeting_Minutes/meeting_minutes.html"> 
-<span class="menu-text">Meeting Minutes</span></a>
+    <a class="nav-link" href="./ShinyApp/ShinyApp.html"> 
+<span class="menu-text">ShinyApp</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./about.html"> 
+<span class="menu-text">About</span></a>
   </li>  
 </ul>
           </div> <!-- /navcollapse -->
@@ -119,8 +162,21 @@ ul.task-list li input[type="checkbox"] {
 <!-- main -->
 <main class="content page-columns page-full column-body" id="quarto-document-content">
 
-<header id="title-block-header">
-<h1 class="title display-7">Rain or Shine: Unveiling The Mysteries of Singapore Weather</h1>
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Rain or Shine: Unveiling The Mysteries of Singapore Weather</h1>
+</div>
+
+
+
+<div class="quarto-title-meta column-body">
+
+    
+  
+    
+  </div>
+  
+
 
 </header>
 
@@ -128,40 +184,8 @@ ul.task-list li input[type="checkbox"] {
 <div class="column-screen">
 <p><img src="images/coverpage-01.png" class="img-fluid"></p>
 </div>
-<hr>
-<section id="introduction" class="level1">
-<h1>Introduction</h1>
-<p>As a small, low-lying city-state, Singapore is vulnerable to the effects of climate change which has brought about more extreme weather patterns - rising sea levels, dry spells and intense rainfall which at times can lead to flash floods.</p>
-<p><img src="images/clipboard-939414320.png" class="img-fluid" width="602"></p>
-<p>According to an <a href="https://www.nccs.gov.sg/singapores-climate-action/impact-of-climate-change-in-singapore/">infographic</a> above by the National Climate Change Secretariat Singapore:</p>
-<ol type="1">
-<li>Daily mean temperatures are projected to increase by 1.4 to 4.6 degrees celsius; and</li>
-<li>The contrast between the wet months (November to January) and dry months (February and June to September) is likely to be more pronounced.</li>
-</ol>
-<p>In Jan 2024, the Centre for Climate Research Singapore (CCRS) announced the <a href="https://www.mss-int.sg/v3-climate-projections">Third National Climate Change Study (V3)</a> which provided potential scenarios of our future based on low, medium, and high global greenhouse gas emissions.</p>
-<ol type="1">
-<li>Very hot days will become more frequent.</li>
-<li>Extreme daily rainfall is projected to intensify.</li>
-<li>The mean sea level around Singapore is projected to rise up to 1.15m by end century, and up to around 2m by 2150 under the high emissions scenario.</li>
-</ol>
-<p>It is important that we better understand how climate change has been affecting Singapore, by understanding the trends in our daily temperatures and rainfall over the years, and utilise historical data to forecast future climate data. It will provide guidance on whether and how Singapore will need to urgently develop ways to mitigate and adapt.</p>
-</section>
-<section id="key-observations" class="level1">
-<h1>Key Observations</h1>
-</section>
-<section id="shiny-app" class="level1">
-<h1>Shiny App</h1>
-</section>
-<section id="user-guide" class="level1">
-<h1>User Guide</h1>
-<iframe src="https://smu.sharepoint.com/teams/VAAProject777/_layouts/15/Doc.aspx?sourcedoc={14d47100-f2ba-46d7-a6fa-85fc0ca0a579}&amp;action=embedview&amp;wdAr=1.7777777777777777" width="800px" height="484px" frameborder="0">This is an embedded <a target="_blank" href="https://office.com">Microsoft Office</a> presentation, powered by <a target="_blank" href="https://office.com/webapps">Office</a>.</iframe>
-
-</section>
-<section id="poster" class="level1">
-<h1>Poster</h1>
 
 
-</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

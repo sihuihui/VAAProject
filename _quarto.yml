@@ -9,17 +9,19 @@ website:
     background: "#293040"
     left:
       - text: Home
-        href: index.qmd
+        href: index.html
       - text: Introduction
-        href: introduction.qmd
-      - text: Project Documentation
+        href: introduction.html
+      - text: Documentation
         menu: 
           - text: Project Proposal
-            href: "Proposal/proposal.qmd"
+            href: Proposal/proposal.html
           - text: Meeting Minutes
             href: Meeting_Minutes/meeting_minutes.html
       - text: Analysis
         menu: 
+          - text: Data Preparation
+            href: Analysis/Dataprep.html
           - text: Exploratory Data Analysis
             href: Analysis/EDA.html
           - text: Confirmatory Data Analysis
@@ -27,7 +29,7 @@ website:
           - text: Forecasting
             href: Analysis/Forecasting.html
       - text: ShinyApp
-        href: https://vaastormtroopers.shinyapps.io/VAAStormTroopers/
+        href: ShinyApp/ShinyApp.html
 
     right:
       - about.qmd

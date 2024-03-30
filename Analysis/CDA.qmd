@@ -1,5 +1,5 @@
 ---
-title: "Prototype - Confirmatory Data Analysis"
+title: "Confirmatory Data Analysis"
 date: "March 1, 2024"
 date-modified: "last-modified"
 toc: true
@@ -12,7 +12,7 @@ execute:
 editor: visual
 ---
 
-## 1. Issues to address
+# 1. Issues to address
 
 The group's Confirmatory Data Analysis seeks to address the following issues:
 
@@ -22,25 +22,20 @@ The group's Confirmatory Data Analysis seeks to address the following issues:
 
 -   Are there certain locations “drier” or “wetter”/ “hotter” or “cooler”?
 
-## 2. The Data
-
-For the project, data utilised is the historical climate data from [Metrological Service Singapore](http://www.weather.gov.sg/climate-historical-daily).
-
-The team downloaded historical daily records from various weather stations across Singapore from 1980 to 2023 via API scrapping as a *daily_historical.csv* datafile, which was subsequently processed to *weather_data_imputed.rds.*
-
-## 3. Set-up
-
-### 3.1 Installing and loading the required libraries
+# 2. Installing and loading the required libraries
 
 The following code chunk is used to install the necessary R packages:
 
 ```{r}
-pacman::p_load(tidyverse,ggridges,ggrepel,ggthemes,ggstatsplot,ggsignif,hrbrthemes,patchwork,dplyr, gifski, gapminder,plotly,gganimate,ggiraph,magick,car)
+pacman::p_load(tidyverse,ggridges,ggthemes,ggstatsplot,hrbrthemes,dplyr,plotly,ggiraph,lubridate, car)
 ```
 
-### 3.2 Importing the Dataset
+# 3. Importing the Dataset
 
 ```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+
 weather_data <- read_rds("data/weather_data_imputed.rds")
 
 glimpse(weather_data)
@@ -48,64 +43,17 @@ glimpse(weather_data)
 DT::datatable(weather_data)
 ```
 
-As can be seen, there are a total of 1548 records across 6 variables:
+# **3.1 Adding year and month columns - for ease of analysis**
 
--   station
-
--   tdate
-
--   mean_monthly_temperature
-
--   min_monthly_temperature
-
--   max_monthly_temperature
-
--   monthly_rainfalls
-
-### 3.3 Data Cleaning
-
-#### **3.3.1 Check for missing values**
+For ease of analysis for CDA, the DATE in *weather_data* was further broken down into year and month and added as columns to *weather_data_detailed:*
 
 ```{r}
-sum(is.na(weather_data))
-```
+#| code-fold: true
+#| code-summary: "Show the code"
 
-#### **3.3.2 Ensuring alignment in time period of records across weather stations**
-
-::: panel-tabset
-## Starting Year
-
-```{r}
-weather_data_start <- weather_data %>% 
-  group_by(station) %>% 
-  mutate(year=year(lubridate::ymd(tdate))) %>%
-  summarise(earliest_year = min(year))
-
-weather_data_start
-```
-
-## Ending Year
-
-```{r}
-weather_data_end <- weather_data %>%
-  group_by(station) %>%
-  mutate(year=year(lubridate::ymd(tdate))) %>%
-  summarise(latest_year = max(year))
-
-weather_data_end
-```
-:::
-
-The starting and ending year of weather data across all 13 weather stations is 2014 and 2023 respectively, no further steps are required to align the time period of the data.
-
-#### **3.3.3 Detailed dataset - adding year and month columns - for ease of analysis**
-
-For ease of analysis, the tdate in *weather_data* was further broken down into year and month and added as columns to *weather_data_detailed:*
-
-```{r}
 weather_data_detailed <- weather_data %>%
-  mutate(year=year(lubridate::ymd(tdate))) %>%
-  mutate(month=month(lubridate::ymd(tdate)))
+  mutate(year=year(lubridate::ymd(DATE))) %>%
+  mutate(month=month(lubridate::ymd(DATE)))
 
 glimpse(weather_data_detailed)
 ```
@@ -113,10 +61,16 @@ glimpse(weather_data_detailed)
 Saving it as a csv file for analysis:
 
 ```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+
 write_csv(weather_data_detailed, "data/weather_data_detailed.csv")
 ```
 
 ```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+
 weather_data_detailed %>%
   group_by(station) %>%
   summarise("Mean Temp" = mean(mean_monthly_temperature),
@@ -125,19 +79,16 @@ weather_data_detailed %>%
             "Total Rainfall" = sum(monthly_rainfall))
 ```
 
-## 4. Confirmatory Data Analysis (CDA)
+# 4. Confirmatory Data Analysis (CDA)
 
 ## 4.1 CDA #1 - Are the changes in rainfall and temperature over the years statistically significant? 
 
-The first CDA that I will address is whether changes in rainfall and temperature over the years are statistically significant
-
-As the data ranges from 2014 to 2023, there are 10 years worth of data.
-
 ## 4.1.1 Rainfall
 
-### 4.1.1.1 Historical rainfall over the years
-
 ```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+
 rainfall_data_year <- weather_data_detailed %>%
   group_by(year) %>%
   summarise(yearly_rainfall = sum(monthly_rainfall))
@@ -150,14 +101,17 @@ DT::datatable(rainfall_data_year,class = "compact")
 DT::datatable(rainfall_data_month,class = "compact")
 ```
 
-Saving it as a csv file:
+Saving as a csv files:
 
 ```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+
 write_csv(rainfall_data_year, "data/rainfall_data_year.csv")
 write_csv(rainfall_data_month, "data/rainfall_data_month.csv")
 ```
 
-## Overview of rainfall over the years
+### 4.1.1.1 Overview of rainfall over the years
 
 ```{r,fig.height=6}
 p1 <- ggplot(rainfall_data_year,
@@ -182,6 +136,7 @@ Before we do so**,** we will need to determine whether the rainfall for each yea
 ### 4.1.1.2 Distribution of Rainfall within the year from 2014 to 2023
 
 ```{r}
+
 p2 <- ggplot(weather_data_detailed,
        aes(x = monthly_rainfall,
            y = as.factor(year), 
@@ -208,6 +163,9 @@ p2
 We test whether the distribution of rainfall within the year from the period of 2014 to 2023 is normal. As the p-values are \< 0.05, we reject null hypothesis. There is sufficient evidence to indicate that the distribution of rainfall within the year from the period of 2014 to 2023 is non-normal.
 
 ```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+
 shapiro.test((weather_data_detailed %>%
   filter(year == 2014))$monthly_rainfall)
 
@@ -246,6 +204,9 @@ shapiro.test((weather_data_detailed %>%
 -   **H~1~:** Groups (different years) have different variances
 
 ```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+
 leveneTest(monthly_rainfall ~ as.factor(year), data = weather_data_detailed)
 ```
 
@@ -253,7 +214,7 @@ leveneTest(monthly_rainfall ~ as.factor(year), data = weather_data_detailed)
 
 Given the above, a non-parametric test will be utilised:
 
-## Rainfall across years
+### 4.1.1.5 Statistical Test for Rainfall across years
 
 **The hypothesis is as follows:**
 
@@ -284,9 +245,10 @@ The plot above shows that the p-value\< 0.05 and for which the null hypothesis w
 
 ## 4.1.2 Temperature
 
-### 4.1.2.1 Historical temperature over the years
-
 ```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+
 temp_year <- weather_data_detailed %>%
   group_by(year) %>%
   summarise(meantemp = median(mean_monthly_temperature),
@@ -296,6 +258,9 @@ DT::datatable(temp_year,class = "compact")
 ```
 
 ```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+
 temp_month <- weather_data_detailed %>%
   group_by(year,month) %>%
   summarise(meantemp = median(mean_monthly_temperature),
@@ -307,11 +272,14 @@ DT::datatable(temp_month,class = "compact")
 Saving it as a csv file:
 
 ```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+
 write_csv(temp_year, "data/temp_year.csv")
 write_csv(temp_month, "data/temp_month.csv")
 ```
 
-## Overview of temperature over the years
+### 4.1.2.1 Overview of temperature over the years
 
 ```{r,fig.width=6}
 combined_data <- reshape2::melt(temp_year, id.vars = "year", variable.name = "temperature_type")
@@ -423,6 +391,9 @@ We test whether the distribution of mean, highest max and lowest min temperature
 ## Mean Temperature
 
 ```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+
 shapiro.test((weather_data_detailed %>%
   filter(year == 2014))$mean_monthly_temperature)
 
@@ -459,6 +430,9 @@ As the p-values for 2016, 2017, 2019 and 2020 above are \> 0.05, we do not rejec
 ## Highest Max Temperature
 
 ```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+
 shapiro.test((weather_data_detailed %>%
   filter(year == 2014))$max_monthly_temperature)
 
@@ -495,6 +469,9 @@ The p-values for 2017, 2019, 2020 and 2022 are \> 0.05, , we do not reject null 
 ## Lowest Min Temperature
 
 ```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+
 shapiro.test((weather_data_detailed %>%
   filter(year == 2014))$min_monthly_temperature)
 
@@ -560,6 +537,8 @@ leveneTest(min_monthly_temperature ~ as.factor(year), data = weather_data_detail
 Based on the Levene Test, p-value of \< 0.05 were observed, we can reject null hypothesis and that there is sufficient evidence to indicate that the groups (different years) have different variances.
 
 Taking in results from the normality test and Levene test, non-parametric tests will be used for the CDA of mean, max and min temperatures.
+
+### 4.1.2.5 Statistical Test for Temperature across years
 
 ::: panel-tabset
 ## Mean Temperature by year
@@ -652,7 +631,7 @@ The plot above shows that the p-value of the test \< 0.05, for which we reject t
 
 ## 4.2.1 Rainfall
 
-### 4.2.1.1 Rainfall across different months
+### 4.2.1.1 Overview of Rainfall across different months
 
 ```{r,fig.width=17,fig.height=15}
 p11 <- ggplot(rainfall_data_month,
@@ -709,7 +688,7 @@ To determine if there are certain months which are drier or wetter, we need to c
 
 As data is aggregated at the monthly_rainfall level in the starting dataset *weather_data*, we will carry out the test below using non-parametric test however in the Shiny App, users will be given the flexibility to change the test type to parametric, robust or even bayes.
 
-## Rainfall across months
+### 4.2.1.2 Statistical Test for Rainfall across months
 
 **The hypothesis is as follows:**
 
@@ -738,7 +717,7 @@ The p-value of the test is \< 0.05, for which the null hypothesis will be reject
 
 ## 4.2.2 Temperature
 
-### 4.2.2.1 Temperature across different months
+### 4.2.2.1 Overview of Temperature across different months
 
 ::: panel-tabset
 ## Mean Temperature
@@ -832,7 +811,7 @@ p17
 
 A cycle plot can be used to visualise the monthly trend of temperature over the years from 2014 to 2023:
 
-## Cycle plot
+### Cycle plot
 
 ```{r}
 hline_mean_temp.data <- temp_month %>%
@@ -920,6 +899,8 @@ p20
 
 As data is aggregated at the *mean_monthly_temperature, max_monthly_temperature and min_monthly_temperature* level in the starting dataset *weather_data*, we will carry out the test below using non-parametric test however in the Shiny App, users will be given the flexibility to change the test type to parametric, robust or even bayes.
 
+### 4.2.2.2 Statistical Test for Temperature across months
+
 ::: panel-tabset
 ## Mean temperature by month
 
@@ -1004,9 +985,10 @@ The plot above shows that the p-value of the test is\< 0.05, for which we reject
 
 ## 4.3.1 Rainfall
 
-### 4.3.1.1 Rainfall across different weather stations
-
 ```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+
 rainfall_data_stn <- weather_data_detailed %>%   
   group_by(station,year) %>%   
   summarise(yearly_rainfall = sum(monthly_rainfall))  
@@ -1016,8 +998,13 @@ DT::datatable(rainfall_data_stn,class = "compact")
 Saving it as a csv file:
 
 ```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+
 write_csv(rainfall_data_stn, "data/rainfall_data_stn.csv")
 ```
+
+### 4.3.1.1 Overview of Rainfall across different weather stations
 
 ```{r,fig.height=6}
 p24 <- ggplot(rainfall_data_stn,
@@ -1036,7 +1023,7 @@ p24 <- ggplot(rainfall_data_stn,
 ggplotly(p24)
 ```
 
-## Rainfall across Weather Stations
+### 4.3.1.2 Statistical Test for Rainfall across weather stations
 
 **The hypothesis is as follows:**
 
@@ -1066,9 +1053,12 @@ p25
 
 The plot above shows that the p-value of the test is \< 0.05, for which we reject the null hypothesis at alpha = 0.05. **There is sufficient evidence to indicate that there is differences in rainfall across stations.**
 
-### 4.3.1.2 Temperature across different weather stations
+## 4.3.2 Temperature
 
 ```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+
 temp_stn <- weather_data_detailed %>%
   group_by(station,year) %>%
   summarise(meantemp = median(mean_monthly_temperature),
@@ -1082,8 +1072,13 @@ DT::datatable(temp_stn,class = "compact")
 Saving it as a csv file:
 
 ```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+
 write_csv(temp_stn, "data/temp_stn.csv")
 ```
+
+### 4.3.2.1 Overview of Temperature across weather stations
 
 ::: panel-tabset
 ## Mean Temperature
@@ -1183,10 +1178,15 @@ p29
 Saving *combined_data, combined_data2* and *combined_data3* as csv files:
 
 ```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+
 write_csv(combined_data, "data/combined_data.csv")
 write_csv(combined_data2, "data/combined_data2.csv")
 write_csv(combined_data3, "data/combined_data3.csv")
 ```
+
+### 4.3.2.2 Statistical Test for Temperature across weather stations
 
 ::: panel-tabset
 ## Mean Temperature
@@ -1282,20 +1282,20 @@ The plot above shows p-value of the test is \< 0.05, for which the null hypothes
 
 ## 4.4 CDA Summary Table
 
-+---------+--------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| S/N     | CDA                                                                      | Findings                                                                                                                                                                                                         |
-+=========+==========================================================================+==================================================================================================================================================================================================================+
-| **1.1** | Are the changes in rainfall over the years statistically significant?    | -   **Over the years, the rainfall volume is generally observed to have increased.**                                                                                                                             |
-|         |                                                                          | -   Based on statistical analysis, we determined that there is **sufficient** evidence to indicate that **there is a difference in the rainfall across the years from 2014 to 2023.**                            |
-+---------+--------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| **1.2** | Are the changes in temperature over the years statistically significant? | -   Based on observation, it seemed like mean, max and min temperature did not undergo significant changes over the years from 2014 to 2023.                                                                     |
-|         |                                                                          | -   However, based on statistical tests, we determined that there is **sufficient** evidence to indicate that **there is a difference in the mean, max and min temperature across the years from 2014 to 2023.** |
-+---------+--------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| **2.1** | Are there really certain months “drier” or “wetter”?                     | -   Yes, there is **sufficient** evidence to indicate that there is a difference in the rainfall across the months.                                                                                              |
-+---------+--------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| **2.2** | Are there really certain months “hotter” or “cooler”?                    | -   Yes, there is **sufficient** evidence to indicate that there is a difference in the mean, max and min temperatures across the months.                                                                        |
-+---------+--------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| **3.1** | Are there certain locations “drier” or “wetter”?                         | -   Yes, there is **sufficient** evidence to indicate that there is differences in rainfall across stations, indicating different locations vary in degree of dryness/wetness.                                   |
-+---------+--------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| **3.2** | Are there certain locations “hotter” or “cooler”?                        | -   Yes, there is **sufficient** evidence to indicate that there is a difference in the mean, max and min temperatures across stations. This suggests that different regions of Singapore are hotter/cooler.     |
-+---------+--------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
++-----------+--------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| S/N       | CDA                                                                      | Findings                                                                                                                                                                                                         |
++===========+==========================================================================+==================================================================================================================================================================================================================+
+| **1.1**   | Are the changes in rainfall over the years statistically significant?    | -   **Over the years, the rainfall volume is generally observed to have increased.**                                                                                                                             |
+|           |                                                                          | -   Based on statistical analysis, we determined that there is **sufficient** evidence to indicate that **there is a difference in the rainfall across the years from 2014 to 2023.**                            |
++-----------+--------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **1.2**   | Are the changes in temperature over the years statistically significant? | -   Based on observation, it seemed like mean, max and min temperature did not undergo significant changes over the years from 2014 to 2023.                                                                     |
+|           |                                                                          | -   However, based on statistical tests, we determined that there is **sufficient** evidence to indicate that **there is a difference in the mean, max and min temperature across the years from 2014 to 2023.** |
++-----------+--------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **2.1**   | Are there really certain months “drier” or “wetter”?                     | -   Yes, there is **sufficient** evidence to indicate that there is a difference in the rainfall across the months.                                                                                              |
++-----------+--------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **2.2**   | Are there really certain months “hotter” or “cooler”?                    | -   Yes, there is **sufficient** evidence to indicate that there is a difference in the mean, max and min temperatures across the months.                                                                        |
++-----------+--------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **3.1**   | Are there certain locations “drier” or “wetter”?                         | -   Yes, there is **sufficient** evidence to indicate that there is differences in rainfall across stations, indicating different locations vary in degree of dryness/wetness.                                   |
++-----------+--------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **3.2**   | Are there certain locations “hotter” or “cooler”?                        | -   Yes, there is **sufficient** evidence to indicate that there is a difference in the mean, max and min temperatures across stations. This suggests that different regions of Singapore are hotter/cooler.     |
++-----------+--------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+

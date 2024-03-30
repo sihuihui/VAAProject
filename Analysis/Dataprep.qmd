@@ -1,0 +1,232 @@
+---
+title: "Data Preparation"
+date: "March 1, 2024"
+date-modified: "last-modified"
+toc: true
+execute:
+  eval: true
+  echo: true
+  freeze: true
+  warning: false
+  message: false
+editor: visual
+---
+
+# **1. Installing and launching required R packages**
+
+```{r}
+pacman::p_load(tidyverse, lubridate, DT, ggplot2, plotly, ggthemes, timetk, modeltime, tidymodels, xgboost, recipes, parsnip, earth)
+```
+
+# 2. Importing Data Into R
+
+We used historical daily weather records from [weather.gov.sg](http://www.weather.gov.sg/climate-historical-daily/), and retrieved the daily records data from Jan 1980 to Dec 2023 via [data.gov.sg's API](https://beta.data.gov.sg/collections/1459/view). The daily historical weather records is in csv file format.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| #| eval: false
+
+data <- read_csv("data/daily_historical.csv")
+glimpse(data)
+```
+
+# 3. Visualising and Data Wrangling
+
+## 3.1 Creating a date column
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+data$DATE <- paste(data$year, "-", data$month, "-", data$day)
+data <- data %>%
+  mutate(DATE = ymd(DATE))
+
+glimpse(data)
+```
+
+## 3.2 Selecting relevant columns for analysis
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+datacleaned <- data %>%
+  select(station, DATE, mean_temperature, maximum_temperature, minimum_temperature, daily_rainfall_total) %>%
+  drop_na(DATE)
+
+str(datacleaned)
+```
+
+## 3.3 Removing weather stations with no temperature data
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+stationstoremove <- c("Botanic Garden","Bukit Panjang","Bukit Timah","Choa Chu Kang (Central)","Jurong Pier","Kent Ridge", "Kranji Reservoir", "Lim Chu Kang", "Lower Peirce Reservoir", "Macritchie Reservoir","Mandai", "Marine Parade","Nicoll Highway", "Pasir Ris (Central)", "Punggol", "Queenstown","Simei", "Somerset (Road)","Tanjong Katong", "Toa Payoh", "Tuas", "Ulu Pandan", "Upper Peirce Reservoir","Whampoa")
+
+#create a operator to exclude things 
+'%!in%' <- function(x,y)!('%in%'(x,y))
+
+#excluded stations that have no temp data at all 
+datacleaned <- datacleaned %>%
+  filter(station %!in% stationstoremove) 
+
+glimpse(datacleaned)
+```
+
+## 3.4 Period Summarisation
+
+```{r}
+mean_monthly_temp <- datacleaned %>%
+  group_by(station) %>%
+  summarise_by_time(
+    DATE,
+    .by = "month", 
+    value = mean(mean_temperature),
+    .type = "ceiling"
+  ) %>% rename(mean_monthly_temperature = value)
+
+mean_monthly_temp
+```
+
+```{r}
+min_monthly_temp <- datacleaned %>%
+  group_by(station) %>%
+  summarise_by_time(
+    DATE,
+    .by = "month", 
+    value = min(minimum_temperature),
+    .type = "ceiling"
+  ) %>% rename(min_monthly_temperature = value)
+
+min_monthly_temp
+```
+
+```{r}
+max_monthly_temp <- datacleaned %>%
+  group_by(station) %>%
+  summarise_by_time(
+    DATE,
+    .by = "month", 
+    value = max(minimum_temperature),
+    .type      = "ceiling"
+  ) %>% rename(max_monthly_temperature = value)
+
+max_monthly_temp
+```
+
+```{r}
+monthly_rf <- datacleaned %>%
+  group_by(station) %>%
+  summarise_by_time(
+    DATE,
+    .by = "month", 
+    value = sum(daily_rainfall_total)
+  ) %>% rename(monthly_rainfall = value)
+
+monthly_rf
+```
+
+## 3.5 Joining the data tables
+
+```{r}
+
+weatherdata <- left_join(mean_monthly_temp, min_monthly_temp)
+weatherdata
+```
+
+```{r}
+
+weatherdata <- left_join(weatherdata, max_monthly_temp)
+weatherdata
+```
+
+```{r}
+
+weatherdata <- left_join(weatherdata, monthly_rf)
+summary(weatherdata)
+```
+
+```{r}
+weatherdata <- weatherdata %>%
+  filter_by_time(DATE, .start_date = "2014-01", .end_date = "2023-12")
+
+
+summary(weatherdata)
+```
+
+```{r}
+write_rds(weatherdata, "data/weather_data.rds")
+
+```
+
+## 3.6 Missing value imputation
+
+```{r}
+unique(weatherdata$DATE)
+```
+
+```{r}
+weatherdata$mean_monthly_temperature <- weatherdata$mean_monthly_temperature %>%
+  ts_impute_vec(period = 2, lambda = "auto")
+
+summary(weatherdata)
+```
+
+```{r}
+
+weatherdata %>%
+  group_by(station) %>%
+  plot_time_series(DATE, mean_monthly_temperature, .facet_ncol = 3)
+```
+
+```{r}
+weatherdata$min_monthly_temperature <- weatherdata$min_monthly_temperature %>%
+  ts_impute_vec(period = 2, lambda = "auto")
+
+summary(weatherdata)
+```
+
+```{r}
+
+weatherdata %>%
+  group_by(station) %>%
+  plot_time_series(DATE, min_monthly_temperature, .facet_ncol = 3)
+```
+
+```{r}
+weatherdata$max_monthly_temperature <- weatherdata$max_monthly_temperature %>%
+  ts_impute_vec(period = 2, lambda = "auto")
+
+summary(weatherdata)
+```
+
+```{r}
+
+weatherdata %>%
+  group_by(station) %>%
+  plot_time_series(DATE, max_monthly_temperature, .facet_ncol = 3)
+```
+
+```{r}
+weatherdata$monthly_rainfall <- weatherdata$monthly_rainfall%>%
+  ts_impute_vec(period = 2, lambda = "auto")
+
+summary(weatherdata)
+```
+
+```{r}
+
+weatherdata %>%
+  group_by(station) %>%
+  plot_time_series(DATE, monthly_rainfall, .facet_ncol = 3)
+```
+
+```{r}
+
+write_rds(weatherdata, "data/weather_data_imputed.rds")
+```
+
+The dataset *weather_data_imputed* was the starting dataset for further analysis - [Exploratory Data Analysis](EDA.html), [Confirmatory Data Analysis](CDA.html) and [Forecasting](Forecasting.html).
