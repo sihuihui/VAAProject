@@ -2,7 +2,7 @@ pacman::p_load(tidyverse, shiny, bslib,
                lubridate, DT, ggplot2, plotly, ggthemes, hrbrthemes, timetk, modeltime, tidymodels, 
                xgboost, recipes, parsnip, workflows, patchwork, thematic, showtext, glue, bsicons,
                tmap, sf,terra, gstat, automap, ggstatsplot, ggridges,ggrepel,ggsignif,gifski, 
-               gganimate,ggiraph,magick,car
+               gganimate,ggiraph,magick,car, shinycssloaders
 )
 
 weatherdata <-read_rds("data/weather_data_imputed.rds")
@@ -201,7 +201,7 @@ ui <- page_navbar(
                 !!!vbs)),
               
               #datatable 
-              card(card_body(DT::dataTableOutput(outputId = "dtTable"))),
+              card(card_body(DT::dataTableOutput(outputId = "dtTable")%>% withSpinner(color="#0B63B5"))),
               
               #map 
               card(
@@ -217,7 +217,7 @@ ui <- page_navbar(
                                   "Minimum Temperature" = "min_temperature",
                                   "Total Rainfall" = "total_rainfall"),
                       selected = "total_rainfall")),
-                  card_body(tmapOutput("mapplot")))                   
+                  card_body(tmapOutput("mapplot")%>% withSpinner(color="#0B63B5")))                   
               ), 
               
               #plot 
@@ -254,7 +254,8 @@ ui <- page_navbar(
                                   "Total Rainfall" = "monthly_rainfall"),
                       selected = "mean_monthly_temperature")
                   ),
-                  card_body(plotlyOutput(outputId = "stationplot")))
+                  card_body(plotlyOutput(outputId = "stationplot")
+                            %>% withSpinner(color="#0B63B5")))
               ))),
 
   # Exploratory Data Analysis
@@ -278,17 +279,17 @@ ui <- page_navbar(
                                                                     "Maximum Temperature" = "maxtemp",
                                                                     "Minimum Temperature" = "mintemp"),
                                                         selected = "meantemp")),
-                                          card_body(plotOutput("eda_tempdistribution"))
+                                          card_body(plotOutput("eda_tempdistribution")%>% withSpinner(color="#0B63B5"))
                                         )),
                               
                               nav_panel("Rainfall",
-                                card_body(plotOutput("eda_rfdistribution"))
+                                card_body(plotOutput("eda_rfdistribution")%>% withSpinner(color="#0B63B5"))
                               ))), 
                           
                           card(
                             navset_tab(
-                              nav_panel("Temperature",card_body(fill = TRUE,plotlyOutput("eda_tempdetailed"))),
-                              nav_panel("Rainfall",card_body(fill = TRUE,plotlyOutput("eda_rfdetailed")))
+                              nav_panel("Temperature",card_body(fill = TRUE,plotlyOutput("eda_tempdetailed")%>% withSpinner(color="#0B63B5"))),
+                              nav_panel("Rainfall",card_body(fill = TRUE,plotlyOutput("eda_rfdetailed")%>% withSpinner(color="#0B63B5")))
                             )),
                           )),
                         
@@ -297,7 +298,7 @@ ui <- page_navbar(
                         col_widths = c(6,6),
       
                         card(card_header("Rainfall Fluctuations by Months"),
-                             card_body(plotlyOutput("eda_rfmonthly"))
+                             card_body(plotlyOutput("eda_rfmonthly")%>% withSpinner(color="#0B63B5"))
                         ),
                         
                         card(card_header("Temperature Fluctuations by Months"),
@@ -306,11 +307,11 @@ ui <- page_navbar(
                              #height = 500,
                              navset_tab(
                                nav_panel("Mean Temperature",
-                                         card_body(plotlyOutput("eda_meantempmonthly"))),
+                                         card_body(plotlyOutput("eda_meantempmonthly")%>% withSpinner(color="#0B63B5"))),
                                nav_panel("Maximum Temperature",
-                                         card_body(plotlyOutput("eda_maxtempmonthly"))),
+                                         card_body(plotlyOutput("eda_maxtempmonthly")%>% withSpinner(color="#0B63B5"))),
                                nav_panel("Minimum Temperature",
-                                         card_body(plotlyOutput("eda_mintempmonthly")))
+                                         card_body(plotlyOutput("eda_mintempmonthly")%>% withSpinner(color="#0B63B5")))
                              )
                         )
                       )),
@@ -319,10 +320,10 @@ ui <- page_navbar(
                       layout_columns(
                         col_widths = c(6,6),
                         card(
-                          card_body(plotlyOutput(outputId = "plot24"))),
+                          card_body(plotlyOutput(outputId = "plot24")%>% withSpinner(color="#0B63B5"))),
                         
                         card(
-                          card_body(plotlyOutput(outputId = "plot25"))
+                          card_body(plotlyOutput(outputId = "plot25")%>% withSpinner(color="#0B63B5"))
                         )
                           
                         )),
@@ -372,7 +373,7 @@ ui <- page_navbar(
                                         label = "Y Axis Title",
                                         value = "")),
                       
-                            card_body(plotlyOutput("compare_weather1"))
+                            card_body(plotlyOutput("compare_weather1")%>% withSpinner(color="#0B63B5"))
                           )), 
                         
                         card("Plot 2",
@@ -414,7 +415,7 @@ ui <- page_navbar(
                                  textInput(inputId = "compare_yaxis2",
                                            label = "Y Axis Title",
                                            value = "")),
-                               card_body(plotlyOutput("compare_weather2"))
+                               card_body(plotlyOutput("compare_weather2")%>% withSpinner(color="#0B63B5"))
                              )), 
                       ))
             )), # end of EDA 
@@ -456,11 +457,11 @@ ui <- page_navbar(
                                              label = "Initiate Comparison")),
               
               nav_panel("Comparison Between Years",
-                        card_body(plotOutput("cda_YearsPlot"))),
+                        card_body(plotOutput("cda_YearsPlot")%>% withSpinner(color="#0B63B5"))),
               nav_panel("Comparison Between Months", 
-                        card_body(plotOutput("cda_MonthsPlot"))), 
+                        card_body(plotOutput("cda_MonthsPlot")%>% withSpinner(color="#0B63B5"))), 
               nav_panel("Comparison Between Stations",
-                        card_body(plotOutput("cda_StationsPlot")))
+                        card_body(plotOutput("cda_StationsPlot")%>% withSpinner(color="#0B63B5")))
 
             )), # End of CDA 
   nav_menu(
@@ -504,7 +505,7 @@ ui <- page_navbar(
                                                              "Remainder" = "remainder",
                                                              "Seasonal Adjusted" = "seasadj"),
                                                  selected = c("observed","season", "trend", "remainder"))),
-                            card_body(plotlyOutput("sh_DecompositionPlot")))                   
+                            card_body(plotlyOutput("sh_DecompositionPlot")%>% withSpinner(color="#0B63B5")))                   
                 ),
                 nav_panel("Validation and Forecasting",
                           layout_sidebar(
@@ -559,8 +560,10 @@ ui <- page_navbar(
                               actionButton(inputId = "sh_forecast",
                                            label = "Initiate Validation and Forecasting")
                             ), 
-                            card(plotlyOutput("sh_ValidationPlot")),
-                            card(plotlyOutput("sh_ForecastPlot")),
+                            card(plotlyOutput("sh_ValidationPlot")%>% withSpinner(color="#0B63B5"),
+                                 fill = FALSE),
+                            card(plotlyOutput("sh_ForecastPlot")%>% withSpinner(color="#0B63B5"), 
+                                 fill = FALSE),
                             layout_column_wrap(
                               value_box(
                                 title = "MAE",
