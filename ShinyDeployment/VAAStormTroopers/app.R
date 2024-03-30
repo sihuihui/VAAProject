@@ -876,7 +876,7 @@ server <- function(input, output){
   })
   
   output$eda_rfdistribution <- renderPlot({
-    ggplot(rainfall_data_month, 
+    ggplot(weather_data_detailed, 
            aes(x = monthly_rainfall,
                y = as.factor(year), 
                fill = 0.5 - abs(0.5-stat(ecdf)))) +
@@ -886,7 +886,7 @@ server <- function(input, output){
                            direction = -1,
                            option="turbo")+
       theme_ridges()+
-      labs(title="Distribution of Monthly Rainfall from 2014 to 2023",
+      labs(title="Distribution of Rainfall from 2014 to 2023",
            y="Year",
            x="Rainfall Volume (mm)")
   })
