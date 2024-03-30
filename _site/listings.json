@@ -1,0 +1,12 @@
+[
+  {
+    "listing": "/index.html",
+    "items": [
+      "/introduction.html",
+      "/Analysis/Dataprep.html",
+      "/Analysis/CDA.html",
+      "/Analysis/Forecasting.html",
+      "/ShinyApp/ShinyApp.html"
+    ]
+  }
+]

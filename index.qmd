@@ -15,3 +15,16 @@ number-sections: false
 ::: column-screen
 ![](images/coverpage-01.png)
 :::
+
+You may wish to explore our website in the following order:
+---
+listing:
+  contents:    
+    - "introduction.qmd"
+    - "Analysis/Dataprep.qmd"
+    - "Analysis/CDA.qmd"
+    - "Analysis/Forecasting.qmd"
+    - "ShinyApp/ShinyApp.qmd"
+  sort: false
+  type: grid
+---
