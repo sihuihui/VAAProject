@@ -1,5 +1,5 @@
 ---
-title: "Prototype - Forecasting"
+title: "Forecasting"
 date: "March 17, 2024"
 date-modified: "last-modified"
 toc: true
@@ -12,237 +12,29 @@ execute:
 editor: visual
 ---
 
-# About this Exercise
+# 1. Issues to address
 
-Let us try some packages to manipulate and forecast time series data.
+-   To carry out decomposition of time series data
 
-# What we want to do
+-   To plot time series data
 
-We want to find the most suitable package(s) that can: 1. allow us to easily aggregate daily data to monthly data 2. impute missing values 3. do decomposition of time series data 4. plot time series data 5. do forecasting of time series data
+-   To carry out forecasting of time series data
 
-# Getting Started
-
-## Installing and launching the packages
+# 2. Installing and loading the required libraries
 
 ```{r}
 pacman::p_load(tidyverse, lubridate, DT, ggplot2, plotly, ggthemes, timetk, modeltime, tidymodels, xgboost, recipes, parsnip, earth)
 
 ```
 
-## Importing the data
-
-We use `read_csv()` function of **readr** to import the `daily_historical` csv file into R then we will use `glimpse()` of **dplyr** to learn about the associated attribute information in the dataframe.
-
-```{r}
-#| code-fold: true
-#| code-summary: "Show the code"
-
-
-data <- read_csv("data/daily_historical.csv")
-glimpse(data)
-```
-
-# Visualising and Data Wrangling
-
-## Creating a date column
-
-```{r}
-#| code-fold: true
-#| code-summary: "Show the code"
-
-
-data$DATE <- paste(data$year, "-", data$month, "-", data$day)
-data <- data %>%
-  mutate(DATE = ymd(DATE))
-
-glimpse(data)
-```
-
-```{r}
-#| code-fold: true
-#| code-summary: "Show the code"
-
-datacleaned <- data %>%
-  select(station, DATE, mean_temperature, maximum_temperature, minimum_temperature, daily_rainfall_total) %>%
-  drop_na(DATE)
-
-str(datacleaned)
-```
-
-```{r}
-#| code-fold: true
-#| code-summary: "Show the code"
-stationstoremove <- c("Botanic Garden","Bukit Panjang","Bukit Timah","Choa Chu Kang (Central)","Jurong Pier","Kent Ridge", "Kranji Reservoir", "Lim Chu Kang", "Lower Peirce Reservoir", "Macritchie Reservoir","Mandai", "Marine Parade","Nicoll Highway", "Pasir Ris (Central)", "Punggol", "Queenstown","Simei", "Somerset (Road)","Tanjong Katong", "Toa Payoh", "Tuas", "Ulu Pandan", "Upper Peirce Reservoir","Whampoa")
-
-#create a operator to exclude things 
-'%!in%' <- function(x,y)!('%in%'(x,y))
-
-#excluded stations that have no temp data at all 
-datacleaned <- datacleaned %>%
-  filter(station %!in% stationstoremove) 
-
-glimpse(datacleaned)
-```
-
-## Period Summarisation
-
-```{r}
-mean_monthly_temp <- datacleaned %>%
-  group_by(station) %>%
-  summarise_by_time(
-    DATE,
-    .by = "month", 
-    value = mean(mean_temperature),
-    .type = "ceiling"
-  ) %>% rename(mean_monthly_temperature = value)
-
-mean_monthly_temp
-```
-
-```{r}
-min_monthly_temp <- datacleaned %>%
-  group_by(station) %>%
-  summarise_by_time(
-    DATE,
-    .by = "month", 
-    value = min(minimum_temperature),
-    .type = "ceiling"
-  ) %>% rename(min_monthly_temperature = value)
-
-min_monthly_temp
-```
-
-```{r}
-max_monthly_temp <- datacleaned %>%
-  group_by(station) %>%
-  summarise_by_time(
-    DATE,
-    .by = "month", 
-    value = max(minimum_temperature),
-    .type      = "ceiling"
-  ) %>% rename(max_monthly_temperature = value)
-
-max_monthly_temp
-```
-
-```{r}
-monthly_rf <- datacleaned %>%
-  group_by(station) %>%
-  summarise_by_time(
-    DATE,
-    .by = "month", 
-    value = sum(daily_rainfall_total)
-  ) %>% rename(monthly_rainfall = value)
-
-monthly_rf
-```
-
-## Joining the data tables
-
-```{r}
-
-weatherdata <- left_join(mean_monthly_temp, min_monthly_temp)
-weatherdata
-```
-
-```{r}
-
-weatherdata <- left_join(weatherdata, max_monthly_temp)
-weatherdata
-```
-
-```{r}
-
-weatherdata <- left_join(weatherdata, monthly_rf)
-summary(weatherdata)
-```
-
-```{r}
-weatherdata <- weatherdata %>%
-  filter_by_time(DATE, .start_date = "2014-01", .end_date = "2023-12")
-
-
-summary(weatherdata)
-```
-
-```{r}
-write_rds(weatherdata, "data/weather_data.rds")
-
-```
-
-## Missing value imputation
-
-```{r}
-unique(weatherdata$DATE)
-```
-
-```{r}
-weatherdata$mean_monthly_temperature <- weatherdata$mean_monthly_temperature %>%
-  ts_impute_vec(period = 2, lambda = "auto")
-
-summary(weatherdata)
-```
-
-```{r}
-
-weatherdata %>%
-  group_by(station) %>%
-  plot_time_series(DATE, mean_monthly_temperature, .facet_ncol = 3)
-```
-
-```{r}
-weatherdata$min_monthly_temperature <- weatherdata$min_monthly_temperature %>%
-  ts_impute_vec(period = 2, lambda = "auto")
-
-summary(weatherdata)
-```
-
-```{r}
-
-weatherdata %>%
-  group_by(station) %>%
-  plot_time_series(DATE, min_monthly_temperature, .facet_ncol = 3)
-```
-
-```{r}
-weatherdata$max_monthly_temperature <- weatherdata$max_monthly_temperature %>%
-  ts_impute_vec(period = 2, lambda = "auto")
-
-summary(weatherdata)
-```
-
-```{r}
-
-weatherdata %>%
-  group_by(station) %>%
-  plot_time_series(DATE, max_monthly_temperature, .facet_ncol = 3)
-```
-
-```{r}
-weatherdata$monthly_rainfall <- weatherdata$monthly_rainfall%>%
-  ts_impute_vec(period = 2, lambda = "auto")
-
-summary(weatherdata)
-```
-
-```{r}
-
-weatherdata %>%
-  group_by(station) %>%
-  plot_time_series(DATE, monthly_rainfall, .facet_ncol = 3)
-```
-
-```{r}
-
-write_rds(weatherdata, "data/weather_data_imputed.rds")
-```
-
-## Decomposition of Time Series Object
+# 3. Importing the Dataset
 
 ```{r}
 
 weatherdata <- read_rds("data/weather_data_imputed.rds")
 ```
+
+# 4. Decomposition of Time Series Object
 
 ```{r}
 weatherdata %>%
@@ -294,11 +86,11 @@ weatherdata %>%
 
 ```
 
-# Forecasting with Modeltime
+# 5. Forecasting with Modeltime
 
 Going to develop a few basic models - ARIMA - Exponential Smoothing - Linear Regression - MARS (Multivariate Adaptive Regression Splines)
 
-## Selecting the data
+## 5.1 Selecting the data
 
 We use mean monthly temperature of Admiralty station as an example.
 
@@ -317,7 +109,7 @@ weatherdata_meantemp <- weatherdata %>%
 weatherdata_meantemp 
 ```
 
-## Visualise the dataset
+## 5.2 Visualise the dataset
 
 ```{r}
 weatherdata_meantemp %>%
@@ -325,7 +117,7 @@ weatherdata_meantemp %>%
 
 ```
 
-## Train/Test
+## 5.3 Train/Test
 
 ```{r}
 splits <- weatherdata_meantemp %>%
@@ -336,9 +128,9 @@ training(splits)
 testing(splits)
 ```
 
-## Creating and Fitting Models
+## 5.4 Creating and Fitting Models
 
-### Model 1 - Auto ARIMA
+### 5.4.1 Model 1 - Auto ARIMA
 
 ```{r}
 model_fit_arima_no_boost <- arima_reg() %>%
@@ -347,7 +139,7 @@ model_fit_arima_no_boost <- arima_reg() %>%
 
 ```
 
-### Boosted Auto ARIMA
+### 5.4.2 Boosted Auto ARIMA
 
 Create a boosted ARIMA. Boosting uses XGBOost to model the ARIMA errors.
 
@@ -363,7 +155,7 @@ model_fit_arima_boosted <- arima_boost(
 
 ```
 
-### Exponential Smoothing
+### 5.4.3 Exponential Smoothing
 
 ```{r}
 model_fit_ets <- exp_smoothing() %>%
@@ -407,7 +199,7 @@ calibration_ets %>%
 
 ```
 
-### Accuracy Metrics
+### 5.4.4 Accuracy Metrics
 
 ```{r}
 
@@ -420,7 +212,7 @@ accuracy_metrics$mape
 accuracy_metrics$rmse
 ```
 
-### Prophet
+### 5.4.5 Prophet
 
 ```{r}
 model_fit_prophet <- prophet_reg() %>%
@@ -429,7 +221,7 @@ model_fit_prophet <- prophet_reg() %>%
 
 ```
 
-### Linear Regression
+### 5.4.6 Linear Regression
 
 ```{r}
 model_fit_lm <- linear_reg() %>%
@@ -439,7 +231,7 @@ model_fit_lm <- linear_reg() %>%
 
 ```
 
-### MARS
+### 5.4.7 MARS
 
 ```{r}
 
@@ -458,7 +250,7 @@ wflw_fit_mars <- workflow() %>%
     fit(training(splits))
 ```
 
-## Add Fitted Models to a Model table
+## 5.5 Add Fitted Models to a Model table
 
 ```{r}
 models_tbl <- modeltime_table(
@@ -474,7 +266,7 @@ models_tbl
 
 ```
 
-## Calibrate the model to a testing set
+## 5.6 Calibrate the model to a testing set
 
 ```{r}
 calibration_tbl <- models_tbl %>%
@@ -484,9 +276,9 @@ calibration_tbl
 
 ```
 
-## Testing Set Forecast & Accuracy Evaluation
+## 5.7 Testing Set Forecast & Accuracy Evaluation
 
-### visualising forecast test
+### 5.7.1 Visualising forecast test
 
 ```{r}
 calibration_tbl %>%
@@ -500,7 +292,7 @@ calibration_tbl %>%
 
 ```
 
-### Accuracy Metrics
+### 5.7.2 Accuracy Metrics
 
 ```{r}
 
@@ -510,7 +302,7 @@ calibration_tbl %>%
 
 ```
 
-## Refit to full dataset and forecast forward
+## 5.8 Refit to full dataset and forecast forward
 
 ```{r}
 refit_tbl <- calibration_tbl %>%
@@ -526,11 +318,11 @@ refit_tbl %>%
 
 ```
 
-# Forecasting with Modeltime (Rainfall Data)
+# 6. Forecasting with Modeltime (Rainfall Data)
 
 Going to develop a few basic models - ARIMA - Exponential Smoothing - Linear Regression - MARS (Multivariate Adaptive Regression Splines)
 
-## Selecting the data
+## 6.1 Selecting the data
 
 We use mean monthly temperature of Admiralty station as an example.
 
@@ -544,7 +336,7 @@ weatherdata_rf <- weatherdata %>%
 weatherdata_rf 
 ```
 
-## Visualise the dataset
+## 6.2 Visualise the dataset
 
 ```{r}
 weatherdata_rf %>%
@@ -552,7 +344,7 @@ weatherdata_rf %>%
 
 ```
 
-## Train/Test
+## 6.3 Train/Test
 
 ```{r}
 splits <- weatherdata_rf %>%
@@ -560,9 +352,9 @@ splits <- weatherdata_rf %>%
 
 ```
 
-## Creating and Fitting Models
+## 6.4 Creating and Fitting Models
 
-### Model 1 - Auto ARIMA
+### 6.4.1 Model 1 - Auto ARIMA
 
 ```{r}
 model_fit_arima_no_boost <- arima_reg() %>%
@@ -571,7 +363,7 @@ model_fit_arima_no_boost <- arima_reg() %>%
 
 ```
 
-### Boosted Auto ARIMA
+### 6.4.2 Boosted Auto ARIMA
 
 Create a boosted ARIMA. Boosting uses XGBOost to model the ARIMA errors.
 
@@ -587,7 +379,7 @@ model_fit_arima_boosted <- arima_boost(
 
 ```
 
-### Exponential Smoothing
+### 6.4.3 Exponential Smoothing
 
 ```{r}
 model_fit_ets <- exp_smoothing() %>%
@@ -596,7 +388,7 @@ model_fit_ets <- exp_smoothing() %>%
 
 ```
 
-### Prophet
+### 6.4.4 Prophet
 
 ```{r}
 model_fit_prophet <- prophet_reg() %>%
@@ -605,7 +397,7 @@ model_fit_prophet <- prophet_reg() %>%
 
 ```
 
-### Linear Regression
+### 6.4.5 Linear Regression
 
 ```{r}
 model_fit_lm <- linear_reg() %>%
@@ -615,7 +407,7 @@ model_fit_lm <- linear_reg() %>%
 
 ```
 
-### MARS
+### 6.4.6 MARS
 
 ```{r}
 
@@ -634,7 +426,7 @@ wflw_fit_mars <- workflow() %>%
     fit(training(splits))
 ```
 
-## Add Fitted Models to a Model table
+## 6.5 Add Fitted Models to a Model table
 
 ```{r}
 models_tbl <- modeltime_table(
@@ -650,7 +442,7 @@ models_tbl
 
 ```
 
-## Calibrate the model to a testing set
+## 6.6 Calibrate the model to a testing set
 
 ```{r}
 calibration_tbl <- models_tbl %>%
@@ -660,9 +452,9 @@ calibration_tbl
 
 ```
 
-## Testing Set Forecast & Accuracy Evaluation
+## 6.7 Testing Set Forecast & Accuracy Evaluation
 
-### visualising forecast test
+### 6.7.1 Visualising forecast test
 
 ```{r}
 calibration_tbl %>%
@@ -676,7 +468,7 @@ calibration_tbl %>%
 
 ```
 
-### Accuracy Metrics
+### 6.7.2 Accuracy Metrics
 
 ```{r}
 
@@ -686,7 +478,7 @@ calibration_tbl %>%
 
 ```
 
-## Refit to full dataset and forecast forward
+## 6.8 Refit to full dataset and forecast forward
 
 ```{r}
 refit_tbl <- calibration_tbl %>%
@@ -700,7 +492,7 @@ refit_tbl %>%
 
 ```
 
-## Removing anomalies
+## 6.9 Removing anomalies
 
 ```{r}
 
