@@ -5,7 +5,7 @@ account: sihuihui
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 11612793
-bundleId: 8434770
+bundleId: 8434827
 url: https://vaastormtroopers.shinyapps.io/VAAStormTroopers/
 version: 1
 asMultiple: FALSE
