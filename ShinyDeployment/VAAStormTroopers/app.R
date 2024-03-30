@@ -6,6 +6,7 @@ pacman::p_load(tidyverse, shiny, bslib,
 )
 
 weatherdata <-read_rds("data/weather_data_imputed.rds")
+weatherdata2 <- read_rds("data/weatherdata2.rds")
 
 weatherdata_summary <-  weatherdata %>%
   group_by(station)%>%
@@ -26,6 +27,20 @@ wdata_sf <- read_rds("data/weatherdata_wstations.rds")
 mpsz2019 <- st_read(dsn = "data/geospatial",
                     layer = "MPSZ-2019") %>% 
   st_transform(crs = 3414)
+
+grid <- terra::rast(mpsz2019,
+                    nrows = 690,  
+                    ncols = 1075)
+
+xy <- terra::xyFromCell(grid, 
+                        1:ncell(grid))
+
+coop <- st_as_sf(as.data.frame(xy), 
+                 coords = c("x", "y"),
+                 crs = st_crs(mpsz2019))
+
+coop <- st_filter(coop, mpsz2019)
+
 ##### Geospatial data #######
 
 ########### EDA data ################
@@ -62,77 +77,90 @@ hline_min_temp.data <- temp_month %>%
 ####### Aesthetics of the dashboard ###################
 # Builds theme object to be supplied to ui
 my_theme <- bs_theme(
-  bslib = "shiny",
-  base_font = font_google("Roboto")
+  "navbar-bg" = "#EEEDDB",
+  bg = "#F6F7FA",
+  fg = "#2D2F32",
+  primary = "#0B63B5",
+  
+  # Controls the accent (e.g., hyperlink, button, etc) colors
+  secondary = "#22556E",
+  base_font = c("Grandstander", "sans-serif"),
+  code_font = c("Courier", "monospace"),
+  heading_font = "'Helvetica Neue', Helvetica, sans-serif",
+  
+  # Can also add lower-level customization
+  "input-border-color" = "#FEB200"
 ) 
 
 # Let thematic know to use the font from bs_lib
-thematic_shiny(font = "auto")
+#thematic_shiny(font = "Roboto")
+
 ####### Aesthetics of the dashboard ###################
 
 ####### Overview Page's Value Boxes ###################
 
 vbs <- list(
   fill = FALSE, 
+  
   #1st value box 
   value_box(
-    title = "Highest Monthly Temp",
+    title = "Highest Monthly Temperature",
     value = textOutput("hotyear"),
-    showcase = bs_icon("thermometer-high"),
+    showcase = bs_icon("thermometer-high",size = 40),
     showcase_layout = "top right",
-    theme = value_box_theme(bg = "#fa2e05", fg = "#f0f2f5"),
+    theme = value_box_theme(bg = "#FE6402", fg = "#f0f2f5"),
     full_screen = FALSE, fill = TRUE, height = NULL
   ),
   
   #2nd value box 
   value_box(
-    title = "Coolest Monthly Temp",
-    value = textOutput("coolyear"),
-    showcase = bs_icon("thermometer-low"),
+    title = "Average Monthly Temperature",
+    value = textOutput("avgtemp"),
+    showcase = bs_icon("thermometer-sun", size = 40),
     showcase_layout = "top right",
-    theme = value_box_theme(bg = "#e7ebbc", fg ="#1a1818"),
+    theme = value_box_theme(bg ="#FEB200"),
     full_screen = FALSE, fill = TRUE, height = NULL
-    #p("At XX station on MM YYYY")
   ),
   
   #3rd value box 
   value_box(
-    title = "Average Monthly Temp",
-    value = textOutput("avgtemp"),
-    showcase = bs_icon("thermometer-sun"),
+    title = "Lowest Monthly Temperature",
+    value = textOutput("coolyear"),
+    showcase = bs_icon("thermometer-low", size = 40),
     showcase_layout = "top right",
-    theme = "orange",
+    theme = value_box_theme(bg = "#FDF8AC", fg ="#1a1818"),
     full_screen = FALSE, fill = TRUE, height = NULL
   ),
+  
   
   #4th value box 
   value_box(
-    title = "Lowest Monthly Rainfall",
-    value = textOutput("lowrain"),
-    showcase = bs_icon("cloud-drizzle"),
-    showcase_layout = "top right",
-    theme = value_box_theme(bg = "#a1d5f0", fg = "#1a1818"),
-    full_screen = FALSE, fill = TRUE, height = NULL
-  ),
-  
-  #5th value box 
-  value_box(
-    title = "Highest Monthly Rainfall",
+    title = "Highest Monthly Rainfall ",
     value = textOutput("highrain"),
-    showcase = bs_icon("cloud-rain-heavy"),
+    showcase = bs_icon("cloud-rain-heavy", size = 40),
     showcase_layout = "top right",
-    theme = value_box_theme(bg = "#065299", fg = "#f0f2f5"),
+    theme = value_box_theme(bg = "#052E55", fg = "#DBDFE3"),
     full_screen = FALSE, fill = TRUE, height = NULL
     
   ),
   
+  #5th value box 
+  value_box(
+    title = "Average Monthly Rainfall ",
+    value = textOutput("avgrain"),
+    showcase = bs_icon("umbrella-fill", size = 40),
+    showcase_layout = "top right",
+    theme = value_box_theme(bg = "#0B63B5",fg = "#DBDFE3"),
+    full_screen = FALSE, fill = TRUE, height = NULL
+  ),
+  
   #6th value box 
   value_box(
-    title = "Average Monthly Rainfall",
-    value = textOutput("avgrain"),
-    showcase = bs_icon("umbrella-fill"),
+    title = "Lowest Monthly Rainfall ",
+    value = textOutput("lowrain"),
+    showcase = bs_icon("cloud-drizzle", size = 40),
     showcase_layout = "top right",
-    theme = value_box_theme(bg = "#6dc2a3",fg = "#1a1818"),
+    theme = value_box_theme(bg = "#92BCE3", fg = "#1a1818"),
     full_screen = FALSE, fill = TRUE, height = NULL
   )
 )
@@ -141,9 +169,16 @@ vbs <- list(
 
 ####################### UI Start ######################################
 ui <- page_navbar(
-  title = "Rain or Shine: Exploring the mysteries of Singapore Weather",
+  bg = "#94AFBF",
+
+  title = "Rain, Hail or Shine: Exploring the Mysteries of the Sky",
+  theme = bslib::bs_theme(
+    bg = "white",
+    fg = "#2D2F32",
+    primary = "#0B63B5",
+  ),
   nav_spacer(),
-  nav_panel(title = "Dashboard",
+  nav_panel(title = "Overview",
             layout_columns(
               col_widths = c(5,7,6,6),
               row_heights = c(2,3), 
@@ -168,20 +203,21 @@ ui <- page_navbar(
                                   "Maximum Temperature" = "max_temperature",
                                   "Minimum Temperature" = "min_temperature",
                                   "Total Rainfall" = "total_rainfall"),
-                      selected = "avg_temperature")),
+                      selected = "total_rainfall")),
                   card_body(tmapOutput("mapplot")))                   
               ), 
               
               #plot 
               card(
-                card_header("Monthly Temperature and Rainfall Readings"), 
+                card_header("Temperature and Rainfall Readings by Stations"), 
                 layout_sidebar(
                   sidebar = sidebar(
                     #open = FALSE,
                     selectInput(
                       inputId = "plot_input1",
                       label = "Select a Station",
-                      choices = c("Admiralty" = "Admiralty",
+                      choices = c("All" = "All", 
+                                  "Admiralty" = "Admiralty",
                                   "Ang Mo Kio" = "Ang Mo Kio",
                                   "Changi" = "Changi", 
                                   "Choa Chu Kang (South)" = "Choa Chu Kang (South)",
@@ -194,7 +230,7 @@ ui <- page_navbar(
                                   "Sentosa Island"  = "Sentosa Island",
                                   "Tai Seng" = "Tai Seng",
                                   "Tuas South" = "Tuas South"),
-                      selected = "Admiralty"),
+                      selected = "All"),
                     
                     selectInput(
                       inputId = "plot_input2",
@@ -205,7 +241,7 @@ ui <- page_navbar(
                                   "Total Rainfall" = "monthly_rainfall"),
                       selected = "mean_monthly_temperature")
                   ),
-                  card_body(plotOutput(outputId = "stationplot")))
+                  card_body(plotlyOutput(outputId = "stationplot")))
               ))),
 
   # Exploratory Data Analysis
@@ -217,9 +253,6 @@ ui <- page_navbar(
                         layout_columns(
                           col_widths = c(6,6),
 
-                          #card(card_body(plotlyOutput("eda_tempoverview"))
-                          #), 
-                  
                           card(
                             navset_bar(
                               nav_panel("Temperature",
@@ -568,13 +601,14 @@ server <- function(input, output){
   
   output$dtTable <- DT::renderDataTable({
     DT::datatable(data = weatherdata_summary,
-                  options = list(pageLength = 3),
+                  options = list(pageLength = 3, lengthMenu = c(3,13)),
                   rownames = FALSE,
                   colnames = c('Station', 'Mean Temp', 'Max Temp', 'Min Temp', 'Total Rainfall'),
                   DT:::DT2BSClass(c('compact', 'cell-border')))
   })
   
-  ##### Geospatial Map Server #######
+  ##### Geospatial Map Server Start #######
+  
   output$mapplot <- renderTmap({
     tmap_options(check.and.fix = TRUE)
     tmap_mode("view")
@@ -584,52 +618,39 @@ server <- function(input, output){
       tm_borders() + 
       tm_shape(wdata_sf) + 
       tm_dots(col = input$map_input) 
-    
   })
-  ##### Geospatial Map Server #######
+    
+  ##### Geospatial Map Server End #######
   
   ##### Plot in Overview Page Server ###### 
   selected_weatherstation <- reactive({ 
-    weatherdata %>%
+    weatherdata2 %>%
       filter(station %in% input$plot_input1) %>%
       select(date = tdate, value = input$plot_input2)
   }) 
   
-  output$stationplot <- renderPlot({
+  output$stationplot <- renderPlotly({
     req(selected_weatherstation())
-    ggplot(data = selected_weatherstation(),
+    D1 <- ggplot(data = selected_weatherstation(),
            aes_string(x = "date", y = "value")) +
-      geom_line()
+      geom_line() +       
+      theme_minimal() +
+      theme(panel.border = element_rect(color = "lightgrey",linetype = "dashed", fill = NA, size = 1)) +
+      labs(title=paste0(input$plot_input1," Station(s) from 2014 to 2023"),
+           x="Year",
+           y= paste0(input$plot_input2))
+    
+    D1 <- ggplotly(D1)
+    
+    D1
+
   })
   ############# Plot in Overview Page Server End #######################
   
   ############# EDA Server Start ########################
   
-  ### Temperature 
+  ### By years 
   
-  #output$eda_tempoverview <- renderPlotly({
-    
-    #p4 <- ggplot(combined_data, 
-                 #aes(x = year, 
-                     #y = value, 
-                     #color = temperature_type)) +
-      #geom_line() +
-      #labs(title = "Temperature Trends from 2014 to 2023",
-           #y = "Temperature (°C)",
-           #x = "Year",
-           #color="Temperature Type") +
-      #scale_x_continuous(breaks = seq(2014, 2023, 1)) +
-      #scale_color_manual(values = c("turquoise", "violetred2", "steelblue2"), 
-                         #labels = c("Mean", "Max", "Min")) +
-      #theme_minimal() +
-      #theme(axis.text.x = element_text(angle = 90, hjust = 1))
-    
-    
-    #p4 <- ggplotly(p4, tooltip="all") %>%
-      #layout(legend = list(x = 0.6, y = 0.2))
-    
-    #p4
-  #})
   
   output$eda_tempdistribution <- renderPlot({
     
@@ -649,6 +670,47 @@ server <- function(input, output){
            x="Temperature (°C)")
     
   })
+  
+  output$eda_rfdistribution <- renderPlot({
+    ggplot(rainfall_data_month, 
+           aes(x = monthly_rainfall,
+               y = as.factor(year), 
+               fill = 0.5 - abs(0.5-stat(ecdf)))) +
+      stat_density_ridges(geom = "density_ridges_gradient", 
+                          calc_ecdf = TRUE) +
+      scale_fill_viridis_c(name = "Tail probability",
+                           direction = -1,
+                           option="turbo")+
+      theme_ridges()+
+      labs(title="Distribution of Monthly Rainfall from 2014 to 2023",
+           y="Year",
+           x="Rainfall Volume (mm)")
+  })
+  
+  output$eda_rfmonthly <- renderPlot({
+    ggplot() +
+      geom_line(data = rainfall_data_month,
+                aes(x = year,
+                    y = monthly_rainfall,
+                    group = month,
+                    colour = as.factor(month)))+
+      geom_hline(aes(yintercept=avgvalue),
+                 data=hline.data,
+                 linetype=6,
+                 colour="red",
+                 size=0.5)+
+      facet_wrap(~month,scales = "free_x")+
+      labs(title = "Rainfall by month from 2014 to 2023",
+           colour = "Month") +
+      xlab("Year")+
+      ylab("Rainfall volume (mm)")+
+      theme_tufte(base_family = "Helvetica")+ 
+      theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 1),
+            legend.position = "none")
+    
+  })
+  
+  ### By months 
   
   output$eda_tempdetailed <- renderPlotly({
     combined_data2 <- reshape2::melt(temp_month, id.vars = c("year", "month"), variable.name = "temperature_type")
@@ -747,20 +809,6 @@ server <- function(input, output){
     
   })
 
-  ### Rainfall 
-  output$eda_rfoverview <- renderPlotly({
-    ggplot(rainfall_data_year,
-           aes(y=yearly_rainfall,
-               x = year))+
-      geom_point()+
-      geom_line() +
-      labs(title="Rainfall from 2014 to 2023",
-           y = "Rainfall volume (mm)",
-           x = "Year") +
-      scale_x_continuous(breaks =seq(2014,2023,1)) +
-      theme_minimal() +
-      theme(axis.text.x=element_text(angle=90,hjust=1),panel.spacing.y = unit(5,"lines"),legend.position = "none")
-  })
   
   output$eda_rfdetailed <- renderPlotly({
     ggplotly(ggplot(rainfall_data_month,
@@ -778,44 +826,7 @@ server <- function(input, output){
                scale_fill_discrete(name = "Year"))
   })
   
-  output$eda_rfdistribution <- renderPlot({
-    ggplot(rainfall_data_month, 
-           aes(x = monthly_rainfall,
-               y = as.factor(year), 
-               fill = 0.5 - abs(0.5-stat(ecdf)))) +
-      stat_density_ridges(geom = "density_ridges_gradient", 
-                          calc_ecdf = TRUE) +
-      scale_fill_viridis_c(name = "Tail probability",
-                           direction = -1,
-                           option="turbo")+
-      theme_ridges()+
-      labs(title="Distribution of Monthly Rainfall from 2014 to 2023",
-           y="Year",
-           x="Rainfall Volume (mm)")
-  })
   
-  output$eda_rfmonthly <- renderPlot({
-    ggplot() +
-      geom_line(data = rainfall_data_month,
-                aes(x = year,
-                    y = monthly_rainfall,
-                    group = month,
-                    colour = as.factor(month)))+
-      geom_hline(aes(yintercept=avgvalue),
-                 data=hline.data,
-                 linetype=6,
-                 colour="red",
-                 size=0.5)+
-      facet_wrap(~month,scales = "free_x")+
-      labs(title = "Rainfall by month from 2014 to 2023",
-           colour = "Month") +
-      xlab("Year")+
-      ylab("Rainfall volume (mm)")+
-      theme_tufte(base_family = "Helvetica")+ 
-      theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 1),
-            legend.position = "none")
-    
-  })
 
   
   ### By Stations 
