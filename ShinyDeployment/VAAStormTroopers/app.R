@@ -181,7 +181,7 @@ vbs <- list(
 ui <- page_navbar(
   bg = "#94AFBF",
 
-  title = "Rain, Hail or Shine: Exploring the Mysteries of the Sky",
+  title = "Rain or Shine: Exploring the Mysteries of the Singapore Weather",
   theme = bslib::bs_theme(
     bg = "white",
     fg = "#2D2F32",
