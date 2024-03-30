@@ -25,7 +25,7 @@ We used historical daily weather records from [weather.gov.sg](http://www.weathe
 ```{r}
 #| code-fold: true
 #| code-summary: "Show the code"
-#| eval: false
+#| #| eval: false
 
 data <- read_csv("data/daily_historical.csv")
 glimpse(data)
@@ -229,4 +229,4 @@ weatherdata %>%
 write_rds(weatherdata, "data/weather_data_imputed.rds")
 ```
 
-The dataset *weather_data_imputed* was the starting dataset for further analysis - [Exploratory Data Analysis](Analysis/EDA.html), [Confirmatory Data Analysis](Analysis/CDA.html) and [Forecasting](Analysis/Forecasting.html).
+The dataset *weather_data_imputed* was the starting dataset for further analysis - [Exploratory Data Analysis](EDA.html), [Confirmatory Data Analysis](CDA.html) and [Forecasting](Forecasting.html).
