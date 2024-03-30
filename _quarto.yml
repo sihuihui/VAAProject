@@ -11,7 +11,6 @@ website:
       - text: Home
         href: index.qmd
       - text: Introduction
-        href: introduction.qmd
       - text: Project Documentation
         menu: 
           - text: Project Proposal
