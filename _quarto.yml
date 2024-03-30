@@ -9,8 +9,9 @@ website:
     background: "#293040"
     left:
       - text: Home
-        href: index.qmd
+        href: index.html
       - text: Introduction
+        href: introduction.html
       - text: Project Documentation
         menu: 
           - text: Project Proposal
