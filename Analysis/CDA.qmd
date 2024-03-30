@@ -35,7 +35,7 @@ The team downloaded historical daily records from various weather stations acros
 The following code chunk is used to install the necessary R packages:
 
 ```{r}
-pacman::p_load(tidyverse,ggridges,ggrepel,ggthemes,ggstatsplot,ggsignif,hrbrthemes,patchwork,dplyr, gifski, gapminder,plotly,gganimate,ggiraph,magick,car)
+pacman::p_load(tidyverse,ggridges,ggrepel,ggthemes,ggstatsplot,ggsignif,hrbrthemes,patchwork,dplyr, gifski, gapminder,plotly,gganimate,ggiraph,magick,car,lubridate)
 ```
 
 ### 3.2 Importing the Dataset
@@ -52,7 +52,7 @@ As can be seen, there are a total of 1548 records across 6 variables:
 
 -   station
 
--   tdate
+-   DATE
 
 -   mean_monthly_temperature
 
@@ -78,7 +78,7 @@ sum(is.na(weather_data))
 ```{r}
 weather_data_start <- weather_data %>% 
   group_by(station) %>% 
-  mutate(year=year(lubridate::ymd(tdate))) %>%
+  mutate(year=year(lubridate::ymd(DATE))) %>%
   summarise(earliest_year = min(year))
 
 weather_data_start
@@ -89,7 +89,7 @@ weather_data_start
 ```{r}
 weather_data_end <- weather_data %>%
   group_by(station) %>%
-  mutate(year=year(lubridate::ymd(tdate))) %>%
+  mutate(year=year(lubridate::ymd(DATE))) %>%
   summarise(latest_year = max(year))
 
 weather_data_end
@@ -100,12 +100,12 @@ The starting and ending year of weather data across all 13 weather stations is 2
 
 #### **3.3.3 Detailed dataset - adding year and month columns - for ease of analysis**
 
-For ease of analysis, the tdate in *weather_data* was further broken down into year and month and added as columns to *weather_data_detailed:*
+For ease of analysis, the DATE in *weather_data* was further broken down into year and month and added as columns to *weather_data_detailed:*
 
 ```{r}
 weather_data_detailed <- weather_data %>%
-  mutate(year=year(lubridate::ymd(tdate))) %>%
-  mutate(month=month(lubridate::ymd(tdate)))
+  mutate(year=year(lubridate::ymd(DATE))) %>%
+  mutate(month=month(lubridate::ymd(DATE)))
 
 glimpse(weather_data_detailed)
 ```
