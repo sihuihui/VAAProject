@@ -388,7 +388,7 @@ main > section {
   color: #fff;
   font-size: 50px;
   font-weight: 900;
-  margin-bottom: 25px;
+  margin-bottom: 10px;
 }
 
 .caption-content > p {
@@ -396,7 +396,7 @@ main > section {
   font-size: 16px;
   margin-bottom: 45px;
   text-transform: capitalize;
-  margin-bottom: 65px;
+  margin-bottom: 10px;
   font-weight: 200;
 }
 

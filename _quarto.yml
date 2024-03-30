@@ -10,16 +10,31 @@ website:
     left:
       - text: Home
         href: index.qmd
-      - text: Project Proposal
-        href: "Proposal/proposal.qmd"
-      - text: Meeting Minutes
-        href: Meeting_Minutes/meeting_minutes.html
+      - text: Introduction
+        href: introduction.qmd
+      - text: Project Documentation
+        menu: 
+          - text: Project Proposal
+            href: "Proposal/proposal.qmd"
+          - text: Meeting Minutes
+            href: Meeting_Minutes/meeting_minutes.html
+      - text: Analysis
+        menu: 
+          - text: Exploratory Data Analysis
+            href: Analysis/EDA.html
+          - text: Confirmatory Data Analysis
+            href: Analysis/CDA.html
+          - text: Forecasting
+            href: Analysis/Forecasting.html
+      - text: ShinyApp
+        href: https://vaastormtroopers.shinyapps.io/VAAStormTroopers/
+
+    right:
+      - about.qmd
 format:
   html:
     theme: 
     - cosmo
-    - style.scss
-    css: styles.css
     toc: true
 
 editor: visual

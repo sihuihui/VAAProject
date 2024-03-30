@@ -1,0 +1,751 @@
+---
+title: "Prototype - Forecasting"
+date: "March 17, 2024"
+date-modified: "last-modified"
+toc: true
+execute:
+  eval: true
+  echo: true
+  freeze: true
+  warning: false
+  message: false
+editor: visual
+---
+
+# About this Exercise
+
+Let us try some packages to manipulate and forecast time series data.
+
+# What we want to do
+
+We want to find the most suitable package(s) that can: 1. allow us to easily aggregate daily data to monthly data 2. impute missing values 3. do decomposition of time series data 4. plot time series data 5. do forecasting of time series data
+
+# Getting Started
+
+## Installing and launching the packages
+
+```{r}
+pacman::p_load(tidyverse, lubridate, DT, ggplot2, plotly, ggthemes, timetk, modeltime, tidymodels, xgboost, recipes, parsnip, earth)
+
+```
+
+## Importing the data
+
+We use `read_csv()` function of **readr** to import the `daily_historical` csv file into R then we will use `glimpse()` of **dplyr** to learn about the associated attribute information in the dataframe.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+data <- read_csv("data/daily_historical.csv")
+glimpse(data)
+```
+
+# Visualising and Data Wrangling
+
+## Creating a date column
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+
+data$DATE <- paste(data$year, "-", data$month, "-", data$day)
+data <- data %>%
+  mutate(DATE = ymd(DATE))
+
+glimpse(data)
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+datacleaned <- data %>%
+  select(station, DATE, mean_temperature, maximum_temperature, minimum_temperature, daily_rainfall_total) %>%
+  drop_na(DATE)
+
+str(datacleaned)
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+stationstoremove <- c("Botanic Garden","Bukit Panjang","Bukit Timah","Choa Chu Kang (Central)","Jurong Pier","Kent Ridge", "Kranji Reservoir", "Lim Chu Kang", "Lower Peirce Reservoir", "Macritchie Reservoir","Mandai", "Marine Parade","Nicoll Highway", "Pasir Ris (Central)", "Punggol", "Queenstown","Simei", "Somerset (Road)","Tanjong Katong", "Toa Payoh", "Tuas", "Ulu Pandan", "Upper Peirce Reservoir","Whampoa")
+
+#create a operator to exclude things 
+'%!in%' <- function(x,y)!('%in%'(x,y))
+
+#excluded stations that have no temp data at all 
+datacleaned <- datacleaned %>%
+  filter(station %!in% stationstoremove) 
+
+glimpse(datacleaned)
+```
+
+## Period Summarisation
+
+```{r}
+mean_monthly_temp <- datacleaned %>%
+  group_by(station) %>%
+  summarise_by_time(
+    DATE,
+    .by = "month", 
+    value = mean(mean_temperature),
+    .type = "ceiling"
+  ) %>% rename(mean_monthly_temperature = value)
+
+mean_monthly_temp
+```
+
+```{r}
+min_monthly_temp <- datacleaned %>%
+  group_by(station) %>%
+  summarise_by_time(
+    DATE,
+    .by = "month", 
+    value = min(minimum_temperature),
+    .type = "ceiling"
+  ) %>% rename(min_monthly_temperature = value)
+
+min_monthly_temp
+```
+
+```{r}
+max_monthly_temp <- datacleaned %>%
+  group_by(station) %>%
+  summarise_by_time(
+    DATE,
+    .by = "month", 
+    value = max(minimum_temperature),
+    .type      = "ceiling"
+  ) %>% rename(max_monthly_temperature = value)
+
+max_monthly_temp
+```
+
+```{r}
+monthly_rf <- datacleaned %>%
+  group_by(station) %>%
+  summarise_by_time(
+    DATE,
+    .by = "month", 
+    value = sum(daily_rainfall_total)
+  ) %>% rename(monthly_rainfall = value)
+
+monthly_rf
+```
+
+## Joining the data tables
+
+```{r}
+
+weatherdata <- left_join(mean_monthly_temp, min_monthly_temp)
+weatherdata
+```
+
+```{r}
+
+weatherdata <- left_join(weatherdata, max_monthly_temp)
+weatherdata
+```
+
+```{r}
+
+weatherdata <- left_join(weatherdata, monthly_rf)
+summary(weatherdata)
+```
+
+```{r}
+weatherdata <- weatherdata %>%
+  filter_by_time(DATE, .start_date = "2014-01", .end_date = "2023-12")
+
+
+summary(weatherdata)
+```
+
+```{r}
+write_rds(weatherdata, "data/weather_data.rds")
+
+```
+
+## Missing value imputation
+
+```{r}
+unique(weatherdata$DATE)
+```
+
+```{r}
+weatherdata$mean_monthly_temperature <- weatherdata$mean_monthly_temperature %>%
+  ts_impute_vec(period = 2, lambda = "auto")
+
+summary(weatherdata)
+```
+
+```{r}
+
+weatherdata %>%
+  group_by(station) %>%
+  plot_time_series(DATE, mean_monthly_temperature, .facet_ncol = 3)
+```
+
+```{r}
+weatherdata$min_monthly_temperature <- weatherdata$min_monthly_temperature %>%
+  ts_impute_vec(period = 2, lambda = "auto")
+
+summary(weatherdata)
+```
+
+```{r}
+
+weatherdata %>%
+  group_by(station) %>%
+  plot_time_series(DATE, min_monthly_temperature, .facet_ncol = 3)
+```
+
+```{r}
+weatherdata$max_monthly_temperature <- weatherdata$max_monthly_temperature %>%
+  ts_impute_vec(period = 2, lambda = "auto")
+
+summary(weatherdata)
+```
+
+```{r}
+
+weatherdata %>%
+  group_by(station) %>%
+  plot_time_series(DATE, max_monthly_temperature, .facet_ncol = 3)
+```
+
+```{r}
+weatherdata$monthly_rainfall <- weatherdata$monthly_rainfall%>%
+  ts_impute_vec(period = 2, lambda = "auto")
+
+summary(weatherdata)
+```
+
+```{r}
+
+weatherdata %>%
+  group_by(station) %>%
+  plot_time_series(DATE, monthly_rainfall, .facet_ncol = 3)
+```
+
+```{r}
+
+write_rds(weatherdata, "data/weather_data_imputed.rds")
+```
+
+## Decomposition of Time Series Object
+
+```{r}
+
+weatherdata <- read_rds("data/weather_data_imputed.rds")
+```
+
+```{r}
+weatherdata %>%
+  filter(station == "Admiralty") %>%
+  plot_seasonal_diagnostics(DATE, mean_monthly_temperature)
+
+```
+
+```{r}
+weatherdata %>%
+  filter(station == "Admiralty") %>%
+  plot_seasonal_diagnostics(DATE, monthly_rainfall)
+
+```
+
+```{r}
+weatherdata %>%
+  filter(station == "Admiralty") %>%
+  plot_stl_diagnostics(DATE, mean_monthly_temperature,
+                       .frequency = "auto", .trend = "auto",
+                        .feature_set = c("observed", "season", "trend", "remainder"))
+
+```
+
+```{r}
+weatherdata %>%
+  filter(station == "Admiralty") %>%
+  plot_stl_diagnostics(DATE, min_monthly_temperature,
+                       .frequency = "auto", .trend = "auto",
+                        .feature_set = c("observed", "season", "trend", "remainder"))
+
+```
+
+```{r}
+weatherdata %>%
+  filter(station == "Admiralty") %>%
+  plot_stl_diagnostics(DATE, max_monthly_temperature,
+                       .frequency = "auto", .trend = "auto",
+                        .feature_set = c("observed", "season", "trend", "remainder"))
+
+```
+
+```{r}
+weatherdata %>%
+  filter(station == "Admiralty") %>%
+  plot_stl_diagnostics(DATE, monthly_rainfall,
+                       .frequency = "auto", .trend = "auto",
+                        .feature_set = c("observed", "season", "trend", "remainder"))
+
+```
+
+# Forecasting with Modeltime
+
+Going to develop a few basic models - ARIMA - Exponential Smoothing - Linear Regression - MARS (Multivariate Adaptive Regression Splines)
+
+## Selecting the data
+
+We use mean monthly temperature of Admiralty station as an example.
+
+First we will select the relevant data column
+
+```{r}
+glimpse(weatherdata)
+
+```
+
+```{r}
+weatherdata_meantemp <- weatherdata %>%
+  filter(station == "Admiralty") %>%
+  select(date = DATE, value = mean_monthly_temperature)
+
+weatherdata_meantemp 
+```
+
+## Visualise the dataset
+
+```{r}
+weatherdata_meantemp %>%
+  plot_time_series(date, value)
+
+```
+
+## Train/Test
+
+```{r}
+splits <- weatherdata_meantemp %>%
+  initial_time_split(prop = 0.8)
+
+splits
+training(splits)
+testing(splits)
+```
+
+## Creating and Fitting Models
+
+### Model 1 - Auto ARIMA
+
+```{r}
+model_fit_arima_no_boost <- arima_reg() %>%
+  set_engine(engine = "auto_arima") %>%
+  fit(value ~ date, data = training(splits))
+
+```
+
+### Boosted Auto ARIMA
+
+Create a boosted ARIMA. Boosting uses XGBOost to model the ARIMA errors.
+
+```{r}
+model_fit_arima_boosted <- arima_boost(
+    min_n = 2,
+    learn_rate = 0.015
+) %>%
+    set_engine(engine = "auto_arima_xgboost") %>%
+    fit(value ~ date + as.numeric(date) + factor(month(date, label = TRUE), ordered = F),
+        data = training(splits))
+
+
+```
+
+### Exponential Smoothing
+
+```{r}
+model_fit_ets <- exp_smoothing() %>%
+    set_engine(engine = "ets") %>%
+    fit(value ~ date, data = training(splits))
+
+```
+
+```{r}
+model_fit_ets
+
+```
+
+```{r}
+calibration_ets <- model_fit_ets %>%
+    modeltime_calibrate(new_data = testing(splits))
+
+calibration_ets
+```
+
+```{r}
+forecast_results <- calibration_ets %>%
+    modeltime_forecast(
+        new_data    = testing(splits),
+        actual_data = weatherdata_meantemp
+    ) 
+
+datatable(forecast_results)
+```
+
+```{r}
+calibration_ets %>%
+    modeltime_forecast(
+        new_data    = testing(splits),
+        actual_data = weatherdata_meantemp
+    ) %>%
+    plot_modeltime_forecast(
+      .legend_max_width = 25
+    )
+
+
+```
+
+### Accuracy Metrics
+
+```{r}
+
+accuracy_metrics <- calibration_ets %>%
+  modeltime_accuracy() 
+
+
+accuracy_metrics$mae
+accuracy_metrics$mape
+accuracy_metrics$rmse
+```
+
+### Prophet
+
+```{r}
+model_fit_prophet <- prophet_reg() %>%
+    set_engine(engine = "prophet") %>%
+    fit(value ~ date, data = training(splits))
+
+```
+
+### Linear Regression
+
+```{r}
+model_fit_lm <- linear_reg() %>%
+    set_engine("lm") %>%
+    fit(value ~ as.numeric(date) + factor(month(date, label = TRUE), ordered = FALSE),
+        data = training(splits))
+
+```
+
+### MARS
+
+```{r}
+
+model_spec_mars <- mars(mode = "regression") %>%
+    set_engine("earth") 
+
+recipe_spec <- recipe(value ~ date, data = training(splits)) %>%
+    step_date(date, features = "month", ordinal = FALSE) %>%
+    step_mutate(date_num = as.numeric(date)) %>%
+    step_normalize(date_num) %>%
+    step_rm(date)
+  
+wflw_fit_mars <- workflow() %>%
+    add_recipe(recipe_spec) %>%
+    add_model(model_spec_mars) %>%
+    fit(training(splits))
+```
+
+## Add Fitted Models to a Model table
+
+```{r}
+models_tbl <- modeltime_table(
+    model_fit_arima_no_boost,
+    model_fit_arima_boosted,
+    model_fit_ets,
+    model_fit_prophet,
+    model_fit_lm,
+    wflw_fit_mars
+)
+
+models_tbl
+
+```
+
+## Calibrate the model to a testing set
+
+```{r}
+calibration_tbl <- models_tbl %>%
+    modeltime_calibrate(new_data = testing(splits))
+
+calibration_tbl
+
+```
+
+## Testing Set Forecast & Accuracy Evaluation
+
+### visualising forecast test
+
+```{r}
+calibration_tbl %>%
+    modeltime_forecast(
+        new_data    = testing(splits),
+        actual_data = weatherdata_meantemp
+    ) %>%
+    plot_modeltime_forecast(
+      .legend_max_width = 25
+    )
+
+```
+
+### Accuracy Metrics
+
+```{r}
+
+calibration_tbl %>%
+    modeltime_accuracy() %>%
+    table_modeltime_accuracy()
+
+```
+
+## Refit to full dataset and forecast forward
+
+```{r}
+refit_tbl <- calibration_tbl %>%
+    modeltime_refit(data = weatherdata_meantemp)
+
+refit_tbl %>%
+    modeltime_forecast(h = "36 months", actual_data = weatherdata_meantemp) %>%
+    plot_modeltime_forecast(
+      .legend_max_width = 25
+
+    )
+
+
+```
+
+# Forecasting with Modeltime (Rainfall Data)
+
+Going to develop a few basic models - ARIMA - Exponential Smoothing - Linear Regression - MARS (Multivariate Adaptive Regression Splines)
+
+## Selecting the data
+
+We use mean monthly temperature of Admiralty station as an example.
+
+First we will select the relevant data column
+
+```{r}
+weatherdata_rf <- weatherdata %>%
+  filter(station == "Admiralty") %>%
+  select(date = DATE, value = monthly_rainfall)
+
+weatherdata_rf 
+```
+
+## Visualise the dataset
+
+```{r}
+weatherdata_rf %>%
+  plot_time_series(date, value)
+
+```
+
+## Train/Test
+
+```{r}
+splits <- weatherdata_rf %>%
+  initial_time_split(prop = 0.8)
+
+```
+
+## Creating and Fitting Models
+
+### Model 1 - Auto ARIMA
+
+```{r}
+model_fit_arima_no_boost <- arima_reg() %>%
+  set_engine(engine = "auto_arima") %>%
+  fit(value ~ date, data = training(splits))
+
+```
+
+### Boosted Auto ARIMA
+
+Create a boosted ARIMA. Boosting uses XGBOost to model the ARIMA errors.
+
+```{r}
+model_fit_arima_boosted <- arima_boost(
+    min_n = 2,
+    learn_rate = 0.015
+) %>%
+    set_engine(engine = "auto_arima_xgboost") %>%
+    fit(value ~ date + as.numeric(date) + factor(month(date, label = TRUE), ordered = F),
+        data = training(splits))
+
+
+```
+
+### Exponential Smoothing
+
+```{r}
+model_fit_ets <- exp_smoothing() %>%
+    set_engine(engine = "ets") %>%
+    fit(value ~ date, data = training(splits))
+
+```
+
+### Prophet
+
+```{r}
+model_fit_prophet <- prophet_reg() %>%
+    set_engine(engine = "prophet") %>%
+    fit(value ~ date, data = training(splits))
+
+```
+
+### Linear Regression
+
+```{r}
+model_fit_lm <- linear_reg() %>%
+    set_engine("lm") %>%
+    fit(value ~ as.numeric(date) + factor(month(date, label = TRUE), ordered = FALSE),
+        data = training(splits))
+
+```
+
+### MARS
+
+```{r}
+
+model_spec_mars <- mars(mode = "regression") %>%
+    set_engine("earth") 
+
+recipe_spec <- recipe(value ~ date, data = training(splits)) %>%
+    step_date(date, features = "month", ordinal = FALSE) %>%
+    step_mutate(date_num = as.numeric(date)) %>%
+    step_normalize(date_num) %>%
+    step_rm(date)
+  
+wflw_fit_mars <- workflow() %>%
+    add_recipe(recipe_spec) %>%
+    add_model(model_spec_mars) %>%
+    fit(training(splits))
+```
+
+## Add Fitted Models to a Model table
+
+```{r}
+models_tbl <- modeltime_table(
+    model_fit_arima_no_boost,
+    model_fit_arima_boosted,
+    model_fit_ets,
+    model_fit_prophet,
+    model_fit_lm,
+    wflw_fit_mars
+)
+
+models_tbl
+
+```
+
+## Calibrate the model to a testing set
+
+```{r}
+calibration_tbl <- models_tbl %>%
+    modeltime_calibrate(new_data = testing(splits))
+
+calibration_tbl
+
+```
+
+## Testing Set Forecast & Accuracy Evaluation
+
+### visualising forecast test
+
+```{r}
+calibration_tbl %>%
+    modeltime_forecast(
+        new_data    = testing(splits),
+        actual_data = weatherdata_rf
+    ) %>%
+    plot_modeltime_forecast(
+      .legend_max_width = 25
+    )
+
+```
+
+### Accuracy Metrics
+
+```{r}
+
+calibration_tbl %>%
+    modeltime_accuracy() %>%
+    table_modeltime_accuracy()
+
+```
+
+## Refit to full dataset and forecast forward
+
+```{r}
+refit_tbl <- calibration_tbl %>%
+    modeltime_refit(data = weatherdata_rf)
+
+refit_tbl %>%
+    modeltime_forecast(h = "36 months", actual_data = weatherdata_rf) %>%
+    plot_modeltime_forecast(
+      .legend_max_width = 25)
+
+
+```
+
+## Removing anomalies
+
+```{r}
+
+anomalize_tbl <- weatherdata %>%
+  group_by(station) %>%
+  anomalize(
+    .date_var = DATE,
+    .value = monthly_rainfall,
+    .iqr_alpha = 0.05,
+    .max_anomalies = 0.20,
+    .message = FALSE
+  )
+
+glimpse(anomalize_tbl)
+
+```
+
+```{r}
+anomalize_tbl %>%
+  group_by(station) %>%
+  filter(station == c("Admiralty", "Ang Mo Kio", "Changi")) %>%
+    plot_anomalies_decomp(
+        .date_var = DATE
+    )
+
+```
+
+```{r}
+anomalize_tbl %>%
+  group_by(station) %>%
+  filter(station == c("Clementi", "Ang Mo Kio", "Changi")) %>%
+  plot_anomalies(
+        DATE,
+        .facet_ncol = 3
+    )
+
+```
+
+```{r}
+anomalize_tbl %>%
+    group_by(station) %>%
+   filter(station == c("Admiralty", "Ang Mo Kio", "Changi")) %>%
+    plot_anomalies_cleaned(
+        DATE,
+        .facet_ncol = 2
+    )
+
+```

@@ -1,0 +1,1301 @@
+---
+title: "Prototype - Confirmatory Data Analysis"
+date: "March 1, 2024"
+date-modified: "last-modified"
+toc: true
+execute:
+  eval: true
+  echo: true
+  freeze: true
+  warning: false
+  message: false
+editor: visual
+---
+
+## 1. Issues to address
+
+The group's Confirmatory Data Analysis seeks to address the following issues:
+
+-   Are the changes in rainfall and temperature over the years statistically significant? 
+
+-   Are there really certain months “drier” or “wetter”/ “hotter” or “cooler”?
+
+-   Are there certain locations “drier” or “wetter”/ “hotter” or “cooler”?
+
+## 2. The Data
+
+For the project, data utilised is the historical climate data from [Metrological Service Singapore](http://www.weather.gov.sg/climate-historical-daily).
+
+The team downloaded historical daily records from various weather stations across Singapore from 1980 to 2023 via API scrapping as a *daily_historical.csv* datafile, which was subsequently processed to *weather_data_imputed.rds.*
+
+## 3. Set-up
+
+### 3.1 Installing and loading the required libraries
+
+The following code chunk is used to install the necessary R packages:
+
+```{r}
+pacman::p_load(tidyverse,ggridges,ggrepel,ggthemes,ggstatsplot,ggsignif,hrbrthemes,patchwork,dplyr, gifski, gapminder,plotly,gganimate,ggiraph,magick,car)
+```
+
+### 3.2 Importing the Dataset
+
+```{r}
+weather_data <- read_rds("data/weather_data_imputed.rds")
+
+glimpse(weather_data)
+
+DT::datatable(weather_data)
+```
+
+As can be seen, there are a total of 1548 records across 6 variables:
+
+-   station
+
+-   tdate
+
+-   mean_monthly_temperature
+
+-   min_monthly_temperature
+
+-   max_monthly_temperature
+
+-   monthly_rainfalls
+
+### 3.3 Data Cleaning
+
+#### **3.3.1 Check for missing values**
+
+```{r}
+sum(is.na(weather_data))
+```
+
+#### **3.3.2 Ensuring alignment in time period of records across weather stations**
+
+::: panel-tabset
+## Starting Year
+
+```{r}
+weather_data_start <- weather_data %>% 
+  group_by(station) %>% 
+  mutate(year=year(lubridate::ymd(tdate))) %>%
+  summarise(earliest_year = min(year))
+
+weather_data_start
+```
+
+## Ending Year
+
+```{r}
+weather_data_end <- weather_data %>%
+  group_by(station) %>%
+  mutate(year=year(lubridate::ymd(tdate))) %>%
+  summarise(latest_year = max(year))
+
+weather_data_end
+```
+:::
+
+The starting and ending year of weather data across all 13 weather stations is 2014 and 2023 respectively, no further steps are required to align the time period of the data.
+
+#### **3.3.3 Detailed dataset - adding year and month columns - for ease of analysis**
+
+For ease of analysis, the tdate in *weather_data* was further broken down into year and month and added as columns to *weather_data_detailed:*
+
+```{r}
+weather_data_detailed <- weather_data %>%
+  mutate(year=year(lubridate::ymd(tdate))) %>%
+  mutate(month=month(lubridate::ymd(tdate)))
+
+glimpse(weather_data_detailed)
+```
+
+Saving it as a csv file for analysis:
+
+```{r}
+write_csv(weather_data_detailed, "data/weather_data_detailed.csv")
+```
+
+```{r}
+weather_data_detailed %>%
+  group_by(station) %>%
+  summarise("Mean Temp" = mean(mean_monthly_temperature),
+            "Max Temp" = max(max_monthly_temperature),
+            "Min Temp" = min(min_monthly_temperature),
+            "Total Rainfall" = sum(monthly_rainfall))
+```
+
+## 4. Confirmatory Data Analysis (CDA)
+
+## 4.1 CDA #1 - Are the changes in rainfall and temperature over the years statistically significant? 
+
+The first CDA that I will address is whether changes in rainfall and temperature over the years are statistically significant
+
+As the data ranges from 2014 to 2023, there are 10 years worth of data.
+
+## 4.1.1 Rainfall
+
+### 4.1.1.1 Historical rainfall over the years
+
+```{r}
+rainfall_data_year <- weather_data_detailed %>%
+  group_by(year) %>%
+  summarise(yearly_rainfall = sum(monthly_rainfall))
+
+rainfall_data_month <- weather_data_detailed %>%
+  group_by(year,month) %>%
+  summarise(monthly_rainfall = sum(monthly_rainfall))
+
+DT::datatable(rainfall_data_year,class = "compact")
+DT::datatable(rainfall_data_month,class = "compact")
+```
+
+Saving it as a csv file:
+
+```{r}
+write_csv(rainfall_data_year, "data/rainfall_data_year.csv")
+write_csv(rainfall_data_month, "data/rainfall_data_month.csv")
+```
+
+## Overview of rainfall over the years
+
+```{r,fig.height=6}
+p1 <- ggplot(rainfall_data_year,
+             aes(y=yearly_rainfall,
+                 x = year))+
+  geom_point()+
+  geom_line() +
+  labs(title="Rainfall from 2014 to 2023",
+       y = "Rainfall volume (mm)",
+       x = "Year") +
+  scale_x_continuous(breaks =seq(2014,2023,1)) +
+  theme_minimal() +
+  theme(axis.text.x=element_text(angle=90,hjust=1),panel.spacing.y = unit(5,"lines"),legend.position = "none")
+
+ggplotly(p1)
+```
+
+Over the years, the rainfall volume is generally observed to have increased. We need to examine if the differences are statistically different.
+
+Before we do so**,** we will need to determine whether the rainfall for each year follows a normal or non-normal distribution and we visualise the distribution of rainfall using ridgeline plots, using the code chunk below.
+
+### 4.1.1.2 Distribution of Rainfall within the year from 2014 to 2023
+
+```{r}
+p2 <- ggplot(weather_data_detailed,
+       aes(x = monthly_rainfall,
+           y = as.factor(year), 
+           fill = 0.5 - abs(0.5-stat(ecdf)))) +
+  stat_density_ridges(geom = "density_ridges_gradient", 
+                      calc_ecdf = TRUE) +
+  scale_fill_viridis_c(name = "Tail probability",
+                       direction = -1,
+                       option="turbo")+
+  theme_ridges()+
+  labs(title="Distribution of Rainfall from 2014 to 2023",
+       y="Year",
+       x="Rainfall Volume (mm)")
+
+p2
+```
+
+### 4.1.1.3 Normality Test - Shapiro-Wilk Normality Test
+
+-   **H~0~:** Sample distribution is normal
+
+-   **H~1~:** Sample distribution is non-normal
+
+We test whether the distribution of rainfall within the year from the period of 2014 to 2023 is normal. As the p-values are \< 0.05, we reject null hypothesis. There is sufficient evidence to indicate that the distribution of rainfall within the year from the period of 2014 to 2023 is non-normal.
+
+```{r}
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2014))$monthly_rainfall)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2015))$monthly_rainfall)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2016))$monthly_rainfall)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2017))$monthly_rainfall)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2018))$monthly_rainfall)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2019))$monthly_rainfall)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2020))$monthly_rainfall)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2021))$monthly_rainfall)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2022))$monthly_rainfall)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2023))$monthly_rainfall)
+```
+
+### 4.1.1.4 Equal Variance Assumption Test
+
+-   **H~0~:** Groups (different years) have equal variances
+
+-   **H~1~:** Groups (different years) have different variances
+
+```{r}
+leveneTest(monthly_rainfall ~ as.factor(year), data = weather_data_detailed)
+```
+
+-   From the above result, we can observe that p-value \< 0.05. We have enough evidence to reject the null hypothesis. So the variance across the samples is not equal at 0.05 significance level.
+
+Given the above, a non-parametric test will be utilised:
+
+## Rainfall across years
+
+**The hypothesis is as follows:**
+
+*H~0~: There is no difference between rainfall per year across 10 years.*
+
+*H~1~: There is a difference between rainfall per year across 10 years.*
+
+```{r}
+p3 <- ggbetweenstats(
+  data = weather_data_detailed,
+  x = year, 
+  y = monthly_rainfall,
+  type = "np",
+  pairwise.display = "significant",
+  conf.level = 0.95,
+  messages = FALSE,
+  title="Distribution of Rainfall across 10 years (2014 to 2023)",
+  ylab = "Rainfall volume (mm)",
+  xlab = "Year",
+  ggsignif.args = list(textsize = 2)
+) +
+  theme(text = element_text(size = 10), plot.title=element_text(size=10))
+
+p3
+```
+
+The plot above shows that the p-value\< 0.05 and for which the null hypothesis will be rejected at alpha = 0.05. **There is sufficient evidence to indicate that there is a difference in the rainfall across the years from 2014 to 2023.**
+
+## 4.1.2 Temperature
+
+### 4.1.2.1 Historical temperature over the years
+
+```{r}
+temp_year <- weather_data_detailed %>%
+  group_by(year) %>%
+  summarise(meantemp = median(mean_monthly_temperature),
+            maxtemp = max(max_monthly_temperature),
+            mintemp = min(min_monthly_temperature))
+DT::datatable(temp_year,class = "compact")
+```
+
+```{r}
+temp_month <- weather_data_detailed %>%
+  group_by(year,month) %>%
+  summarise(meantemp = median(mean_monthly_temperature),
+            maxtemp = max(max_monthly_temperature),
+            mintemp = min(min_monthly_temperature))
+DT::datatable(temp_month,class = "compact")
+```
+
+Saving it as a csv file:
+
+```{r}
+write_csv(temp_year, "data/temp_year.csv")
+write_csv(temp_month, "data/temp_month.csv")
+```
+
+## Overview of temperature over the years
+
+```{r,fig.width=6}
+combined_data <- reshape2::melt(temp_year, id.vars = "year", variable.name = "temperature_type")
+
+p4 <- ggplot(combined_data, 
+             aes(x = year, 
+                 y = value, 
+                 color = temperature_type)) +
+  geom_line() +
+  labs(title = "Temperature Trends from 2014 to 2023",
+       y = "Temperature (°C)",
+       x = "Year",
+       color="Temperature Type") +
+  scale_x_continuous(breaks = seq(2014, 2023, 1)) +
+  scale_color_manual(values = c("turquoise", "violetred2", "steelblue2"), 
+                      labels = c("Mean", "Max", "Min")) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+        
+
+p4 <- ggplotly(p4, tooltip="all") %>%
+  layout(legend = list(x = 0.6, y = 0.2))
+
+p4
+```
+
+Based on observation, it seems like mean, max and min temperature did not undergo significant changes over the years from 2014 to 2023.
+
+### 4.1.2.2 Distribution of Temperature (Mean, Max and Min) from 2014 to 2023
+
+Likewise, to determine whether the changes in the mean, maximum and minimum temperatures are significant**,** we will need to determine whether the temperature data within each year follows a normal or non-normal distribution. We visualise the distribution using ridgeline plots, using the code chunks below.
+
+::: panel-tabset
+## Distribution of Mean Temperature
+
+```{r,fig.width=30,fig.height=20}
+p5 <- ggplot(weather_data_detailed, 
+       aes(x = mean_monthly_temperature, 
+           y = as.factor(year), 
+           fill = 0.5 - abs(0.5-stat(ecdf)))) +
+  stat_density_ridges(geom = "density_ridges_gradient", 
+                      calc_ecdf = TRUE) +
+  scale_fill_viridis_c(name = "Tail probability",
+                       direction = -1,
+                       option="turbo")+
+  theme_ridges(font_size = 25)+
+  scale_color_discrete(name = "Year") +
+  labs(title="Distribution of Mean Temperature from 2014 to 2023",
+       y="Year",
+       x="Temperature (°C)")
+
+p5
+```
+
+## Distribution of Maximum Temperature
+
+```{r,fig.width=30,fig.height=20}
+p6 <- ggplot(weather_data_detailed, 
+       aes(x = max_monthly_temperature, 
+           y = as.factor(year), 
+           fill = 0.5 - abs(0.5-stat(ecdf)))) +
+  stat_density_ridges(geom = "density_ridges_gradient", 
+                      calc_ecdf = TRUE) +
+  scale_fill_viridis_c(name = "Tail probability",
+                       direction = -1,
+                       option="turbo")+
+  theme_ridges(font_size = 25)+
+  scale_color_discrete(name = "Year") +
+  labs(title="Distribution of Max Temperature from 2014 to 2023",
+       y="Year",
+       x="Temperature (°C)")
+
+p6
+```
+
+## Distribution of Minimum Temperature
+
+```{r,fig.width=30,fig.height=20}
+p7 <- ggplot(weather_data_detailed, 
+       aes(x = min_monthly_temperature, 
+           y = as.factor(year), 
+           fill = 0.5 - abs(0.5-stat(ecdf)))) +
+  stat_density_ridges(geom = "density_ridges_gradient", 
+                      calc_ecdf = TRUE) +
+  scale_fill_viridis_c(name = "Tail probability",
+                       direction = -1,
+                       option="turbo")+
+  theme_ridges(font_size = 25)+
+  scale_color_discrete(name = "Year") +
+  labs(title="Distribution of Min Temperature from 2014 to 2023",
+       y="Year",
+       x="Temperature (°C)")
+
+p7
+```
+
+From the plots above, it seems like the distribution of mean, highest maximum and lowest minimum temperature within each year is not normal.
+:::
+
+### 4.1.2.3 Normality Test - Shapiro-Wilk Normality Test
+
+-   **H~0~:** Sample distribution is normal
+
+-   **H~1~:** Sample distribution is non-normal
+
+We test whether the distribution of mean, highest max and lowest min temperature within the years are normal:
+
+::: panel-tabset
+## Mean Temperature
+
+```{r}
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2014))$mean_monthly_temperature)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2015))$mean_monthly_temperature)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2016))$mean_monthly_temperature)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2017))$mean_monthly_temperature)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2018))$mean_monthly_temperature)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2019))$mean_monthly_temperature)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2020))$mean_monthly_temperature)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2021))$mean_monthly_temperature)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2022))$mean_monthly_temperature)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2023))$mean_monthly_temperature)
+```
+
+As the p-values for 2016, 2017, 2019 and 2020 above are \> 0.05, we do not reject null hypothesis. There is insufficient evidence to indicate that the distribution of mean temperature within the years is non-normal.
+
+## Highest Max Temperature
+
+```{r}
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2014))$max_monthly_temperature)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2015))$max_monthly_temperature)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2016))$max_monthly_temperature)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2017))$max_monthly_temperature)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2018))$max_monthly_temperature)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2019))$max_monthly_temperature)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2020))$max_monthly_temperature)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2021))$max_monthly_temperature)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2022))$max_monthly_temperature)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2023))$max_monthly_temperature)
+```
+
+The p-values for 2017, 2019, 2020 and 2022 are \> 0.05, , we do not reject null hypothesis. There is insufficient evidence to indicate that the distribution of max temperature within the years is non-normal.
+
+## Lowest Min Temperature
+
+```{r}
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2014))$min_monthly_temperature)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2015))$min_monthly_temperature)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2016))$min_monthly_temperature)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2017))$min_monthly_temperature)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2018))$min_monthly_temperature)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2019))$min_monthly_temperature)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2020))$min_monthly_temperature)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2021))$min_monthly_temperature)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2022))$min_monthly_temperature)
+
+shapiro.test((weather_data_detailed %>%
+  filter(year == 2023))$min_monthly_temperature)
+```
+
+The p-values for 2014, 2015, 2017, 2019, 2020.and 2023 are \> 0.05, , we do not reject null hypothesis. There is insufficient evidence to indicate that the distribution of min temperature within the years is non-normal.
+:::
+
+### 4.1.2.4 Equal Variance Assumption Test
+
+-   **H~0~:** Groups (different years) have equal variances
+
+-   **H~1~:** Groups (different years) have different variances
+
+::: panel-tabset
+## Mean Temperature
+
+```{r}
+leveneTest(mean_monthly_temperature ~ as.factor(year), data = weather_data_detailed)
+
+```
+
+## Max Temperature
+
+```{r}
+leveneTest(max_monthly_temperature ~ as.factor(year), data = weather_data_detailed)
+
+```
+
+## Min Temperature
+
+```{r}
+leveneTest(min_monthly_temperature ~ as.factor(year), data = weather_data_detailed)
+```
+:::
+
+Based on the Levene Test, p-value of \< 0.05 were observed, we can reject null hypothesis and that there is sufficient evidence to indicate that the groups (different years) have different variances.
+
+Taking in results from the normality test and Levene test, non-parametric tests will be used for the CDA of mean, max and min temperatures.
+
+::: panel-tabset
+## Mean Temperature by year
+
+**The hypothesis is as follows:**
+
+*H~0~: There is no difference between mean temperature of each year across 10 years.*
+
+*H~1~: There is a difference between mean temperature of each year across 10 years.*
+
+```{r,fig.width=12,fig.height=10}
+p8 <- ggbetweenstats(
+  data = weather_data_detailed,
+  x = year, 
+  y = mean_monthly_temperature,
+  type = "np",
+  pairwise.display = "significant",
+  conf.level = 0.95,
+  messages = FALSE,
+  title="Distribution of Mean Temperature of each year across 10 years (2014 to 2023)",
+  ylab = "Temperature (°C)",
+  xlab = "Year",
+  ggsignif.args = list(textsize = 5)
+) +
+  theme(text = element_text(size = 20),plot.title=element_text(size=20))
+p8
+
+```
+
+The plot above shows that the p-value of the test \< 0.05, for which we reject the null hypothesis at alpha = 0.05. **There is sufficient evidence to indicate that there is a difference in the mean temperature across the years from 2014 to 2023.**
+
+## Max Temperature by year
+
+**The** **hypothesis is as follows:**
+
+*H~0~: There is no difference between max temperature of each year across 10 years.*
+
+*H~1~: There is a difference between max temperature of each year across 10 years.*
+
+```{r,fig.width=12,fig.height=10}
+p9 <- ggbetweenstats(
+  data = weather_data_detailed,
+  x = year, 
+  y = max_monthly_temperature,
+  type = "np",
+  pairwise.display = "signficant",
+  conf.level = 0.95,
+  messages = FALSE,
+  title="Distribution of Max Temperature of each year across 10 years (2014 to 2023)",
+  ylab = "Temperature (°C)",
+  xlab = "Year",
+  ggsignif.args = list(textsize = 5)
+) +
+  theme(text = element_text(size = 20),plot.title=element_text(size=20))
+p9
+```
+
+The plot above shows that the p-value of the test \< 0.05, for which we reject the null hypothesis at alpha = 0.05. **There is sufficient evidence to indicate that there is a difference in the highest max temperature across the years from 2014 to 2023.**
+
+## Min Temperature by year
+
+**The** **hypothesis is as follows:**
+
+*H~0~: There is no difference between min temperature per year across 10 years.*
+
+*H~1~: There is a difference between min temperature per year across 10 years.*
+
+```{r,fig.width=12,fig.height=10}
+p10 <- ggbetweenstats(
+  data = weather_data_detailed,
+  x = year, 
+  y = min_monthly_temperature,
+  type = "np",
+  pairwise.display = "significant",
+  conf.level = 0.95,
+  messages = FALSE,
+  title="Distribution of Min Temperature of each year across 10 years (2014 to 2023)",
+  ylab = "Temperature (°C)",
+  xlab = "Year",
+  ggsignif.args = list(textsize = 5)
+) +
+  theme(text = element_text(size = 20),plot.title=element_text(size=20))
+p10
+```
+
+The plot above shows that the p-value of the test \< 0.05, for which we reject the null hypothesis at alpha = 0.05. **There is sufficient evidence to indicate that there is a difference in the min temperature across the years from 2014 to 2023.**
+:::
+
+## 4.2 CDA #2 - Are there really certain months “drier” or “wetter”/ “hotter” or “cooler”?
+
+## 4.2.1 Rainfall
+
+### 4.2.1.1 Rainfall across different months
+
+```{r,fig.width=17,fig.height=15}
+p11 <- ggplot(rainfall_data_month,
+             aes(y=monthly_rainfall,
+                 x = as.factor(month),
+                 fill = as.factor(year))) +
+  geom_bar(stat = "identity")+
+  facet_wrap(~year, scales = "free_x") +
+  labs(title="Monthly rainfall each year from 2014 to 2023",
+       y = "Rainfall volume (mm)",
+       x = "Month") +
+  theme_minimal()+
+  theme(panel.spacing.y = unit(10, "lines"))+
+  scale_fill_discrete(name = "Year")
+
+ggplotly(p11)
+```
+
+From the above plots, in 2014 and 2015, it can be seen that rainfall volume is higher in the later months of the year however this is less obvious after 2016. Notably, in 2021, a higher volume of rainfall was seen in January as compared to December.
+
+A cycle plot can also be used to visualise the monthly trend of rainfall over the years from 2014 to 2023:
+
+### Cycle plot
+
+```{r}
+hline.data <- rainfall_data_month %>%
+  group_by(month) %>%
+  summarise(avgvalue = mean(monthly_rainfall))
+```
+
+```{r}
+p12 <- ggplot() +
+  geom_line(data = rainfall_data_month,
+            aes(x = year,
+                y = monthly_rainfall,
+                group = month,
+                colour = as.factor(month)))+
+              geom_hline(aes(yintercept=avgvalue),
+                         data=hline.data,
+                         linetype=6,
+                         colour="red",
+                         size=0.5)+
+              facet_wrap(~month,scales = "free_x")+
+              labs(title = "Rainfall by month from 2014 to 2023",
+                   colour = "Month") +
+  xlab("Year")+
+  ylab("Rainfall volume (mm)")+
+              theme_tufte(base_family = "Helvetica")+ theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 1))
+
+p12
+```
+
+To determine if there are certain months which are drier or wetter, we need to carry out statistical test to determine if there is a significant difference in the rainfall volume across months.
+
+As data is aggregated at the monthly_rainfall level in the starting dataset *weather_data*, we will carry out the test below using non-parametric test however in the Shiny App, users will be given the flexibility to change the test type to parametric, robust or even bayes.
+
+## Rainfall across months
+
+**The hypothesis is as follows:**
+
+*H~0~: There is no difference between rainfall across months.*
+
+*H~1~: There is a difference between rainfall across months.*
+
+```{r,fig.width=12,fig.height=10}
+p13 <- ggbetweenstats(
+  data = weather_data_detailed,
+  x = month, 
+  y = monthly_rainfall,
+  type = "np",
+  pairwise.display = "significant",
+  messages = FALSE,
+  title="Distribution of Rainfall across months (2014 to 2023)",
+  ylab = "Rainfall volume (mm)",
+  xlab = "Month",
+  ggsignif.args = list(textsize = 5)
+) +
+  theme(text = element_text(size = 20), plot.title=element_text(size=20))
+p13
+```
+
+The p-value of the test is \< 0.05, for which the null hypothesis will be rejected at alpha = 0.05. There is sufficient evidence to indicate that there is a difference in the rainfall across the months.
+
+## 4.2.2 Temperature
+
+### 4.2.2.1 Temperature across different months
+
+::: panel-tabset
+## Mean Temperature
+
+```{r,fig.width=15,fig.height=12}
+p14 <- ggplot(temp_month,
+       aes(y = meantemp,
+           x = month,
+           colour = as.factor(year))) +
+  geom_line()+
+  facet_wrap(~ year,scales = "free_x") +
+  labs(title="Mean temperature from 2014 to 2023",
+       y = "Temperature (°C)",
+       x = "Year")+
+  scale_x_continuous(breaks = seq(1,12,1))+
+  scale_color_discrete(name = "Year")+
+  theme_minimal() +
+  theme(panel.spacing.y = unit(5,"lines"),
+        axis.text.x = element_text(angle = 90))
+
+ggplotly(p14)
+```
+
+## Highest Max Temperature
+
+```{r,fig.width=15,fig.height=12}
+p15 <- ggplot(temp_month,
+       aes(y = maxtemp,
+           x = month,
+           colour = as.factor(year))) +
+  geom_line()+
+  facet_wrap(~year,scales = "free_x") +
+  labs(title="Max temperature from 2014 to 2023",
+       y = "Temperature (°C)",
+       x = "Year") +
+  scale_x_continuous(breaks = 1:12, labels = 1:12)+
+  scale_color_discrete(name = "Year") +
+  theme_minimal() +
+  theme(panel.spacing.y = unit(5,"lines"))
+
+ggplotly(p15)
+```
+
+## Lowest Minimum Temperature
+
+```{r,fig.width=15,fig.height=12}
+p16 <- ggplot(temp_month,
+       aes(y = mintemp,
+           x = month,
+           colour = as.factor(year))) +
+  geom_line()+
+  facet_wrap(~year,scales = "free_x") +
+  labs(title="Min temperature from 2014 to 2023",
+       y = "Temperature (°C)",
+       x = "Year") +
+  scale_x_continuous(breaks = 1:12, labels = 1:12)+
+  scale_color_discrete(name = "Year") +
+  theme_minimal() +
+  theme(panel.spacing.y = unit(5,"lines"))
+
+ggplotly(p16)
+```
+:::
+
+## Combined view
+
+```{r,fig.width==6}
+
+combined_data2 <- reshape2::melt(temp_month, id.vars = c("year", "month"), variable.name = "temperature_type")
+
+p17 <- ggplot(combined_data2, aes(x = month, 
+                                 y = value,
+                                 color = temperature_type)) +
+  geom_line() +
+  facet_wrap(~ year,scales = "free_x")+
+  labs(title = "Detailed Temperature Trends from 2014 to 2023",
+       y = "Temperature (°C)",
+       x = "Month",
+       color = "Temperature Type") +
+  scale_x_continuous(breaks = seq(1,12, 1)) +
+  scale_color_manual(values = c("turquoise", "violetred2", "steelblue2"), 
+                      labels = c("Mean", "Max", "Min")) +
+  theme_minimal() +
+  theme(panel.border = element_rect(color = "lightgrey",linetype = "dashed", fill = NA, size = 1))
+
+p17 <- ggplotly(p17, tooltip = "all")%>%
+  layout(legend = list(x = 0.6, y = -0.1))
+
+p17
+```
+
+A cycle plot can be used to visualise the monthly trend of temperature over the years from 2014 to 2023:
+
+## Cycle plot
+
+```{r}
+hline_mean_temp.data <- temp_month %>%
+  group_by(year) %>%
+  summarise(avgvalue = mean(meantemp))
+
+hline_max_temp.data <- temp_month %>%
+  group_by(year) %>%
+  summarise(avgvalue = mean(maxtemp))
+
+hline_min_temp.data <- temp_month %>%
+  group_by(year) %>%
+  summarise(avgvalue = mean(mintemp))
+```
+
+```{r}
+p18 <- ggplot() +
+  geom_line(data = temp_month,
+            aes(x = as.factor(month),
+                y = meantemp,
+                group = year,
+                colour = as.factor(year)))+
+              geom_hline(aes(yintercept=avgvalue),
+                         data=hline_mean_temp.data,
+                         linetype=6,
+                         colour="red",
+                         size=0.5)+
+              facet_wrap(~year,scales = "free_x")+
+              labs(axis.text.x=element_blank(),
+                   title = "Mean temperature by year from 2014 to 2023")+
+              xlab("")+
+              ylab("Degrees (°C)")+
+              scale_color_discrete(name = "Year")+
+              theme_tufte(base_family = "Helvetica")
+
+p18
+```
+
+```{r}
+
+p19 <- ggplot() +
+  geom_line(data = temp_month,
+            aes(x = as.factor(month),
+                y = maxtemp,
+                group = year,
+                colour = as.factor(year)))+
+              geom_hline(aes(yintercept=avgvalue),
+                         data=hline_max_temp.data,
+                         linetype=6,
+                         colour="red",
+                         size=0.5)+
+              facet_wrap(~year,scales = "free_x")+
+              labs(axis.text.x=element_blank(),
+                   title = "Max temperature by year from 2014 to 2023")+
+              xlab("")+
+              ylab("Degrees (°C)")+
+              scale_color_discrete(name = "Year")+
+              theme_tufte(base_family = "Helvetica")
+
+p19
+```
+
+```{r}
+p20 <- ggplot() +
+  geom_line(data = temp_month,
+            aes(x = as.factor(month),
+                y = mintemp,
+                group = year,
+                colour = as.factor(year)))+
+              geom_hline(aes(yintercept=avgvalue),
+                         data=hline_min_temp.data,
+                         linetype=6,
+                         colour="red",
+                         size=0.5)+
+              facet_wrap(~year,scales = "free_x")+
+              labs(axis.text.x=element_blank(),
+                   title = "Min temperature by year from 2014 to 2023")+
+              xlab("")+
+              ylab("Degrees (°C)")+
+              scale_color_discrete(name = "Year")+
+              theme_tufte(base_family = "Helvetica")
+
+p20
+```
+
+As data is aggregated at the *mean_monthly_temperature, max_monthly_temperature and min_monthly_temperature* level in the starting dataset *weather_data*, we will carry out the test below using non-parametric test however in the Shiny App, users will be given the flexibility to change the test type to parametric, robust or even bayes.
+
+::: panel-tabset
+## Mean temperature by month
+
+**The** **hypothesis is as follows:**
+
+*H~0~: There is no difference between mean temperature across months.*
+
+*H~1~: There is a difference between mean temperature across months.*
+
+```{r,fig.width=12,fig.height=10}
+p21 <- ggbetweenstats(data = weather_data_detailed,
+                      x = month,
+                      y = mean_monthly_temperature,
+                      type = "np",
+                      pairwise.display = "signficant",
+                      conf.level = 0.95,
+                      messages = FALSE,
+                      title = "Distribution of Mean Temperature by month (2014 to 2023)",
+                      ylab = "Temperature (°C)",
+                      xlab = "Month",
+                      ggsignif.args = list(textsize =5)) +
+  theme(text = element_text(size = 20),plot.title = element_text(size = 20))
+p21
+```
+
+The p-value was found to be \< 0.05, for which the null hypothesis will be rejected at alpha = 0.05. There is sufficient evidence to indicate that there is a difference in the mean temperature across the months.
+
+## Max Temperature by month
+
+**The hypothesis is as follows:**
+
+*H~0~: There is no difference between max temperature across months.*
+
+*H~1~: There is a difference between max temperature across months.*
+
+```{r,fig.width=12,fig.height=10}
+p22 <- ggbetweenstats(data = weather_data_detailed,
+                      x = month,
+                      y = max_monthly_temperature,
+                      type = "np",
+                      pairwise.display = "signficant",
+                      conf.level = 0.95,
+                      messages = FALSE,
+                      title = "Distribution of Max Temperature by month (2014 to 2023)",
+                      ylab = "Temperature (°C)",
+                      xlab = "Month",
+                      ggsignif.args = list(textsize =5)) +
+  theme(text = element_text(size = 20),plot.title = element_text(size = 20))
+p22
+```
+
+The plot above shows p-value \< 0.05, for which the null hypothesis will be rejected at alpha = 0.05. There is sufficient evidence to indicate that there is a difference in the max temperature across the months.
+
+## Min Temperature by month
+
+**The hypothesis is as follows:**
+
+*H~0~: There is no difference between min temperature across months.*
+
+*H~1~: There is a difference between min temperature across months.*
+
+```{r,fig.width=12,fig.height=10}
+p23 <- ggbetweenstats(data = weather_data_detailed,
+                      x = month,
+                      y = min_monthly_temperature,
+                      type = "np",
+                      pairwise.display = "significant",
+                      conf.level = 0.95,
+                      messages = FALSE,
+                      title = "Distribution of Min Temperature by month (2014 to 2023)",
+                      ylab = "Temperature (°C)",
+                      xlab = "Month",
+                      ggsignif.args = list(textsize =5)) +
+  theme(text = element_text(size = 20),plot.title = element_text(size = 20))
+p23
+```
+
+The plot above shows that the p-value of the test is\< 0.05, for which we reject the null hypothesis at alpha = 0.05. There is sufficient evidence to indicate that there is a difference in the min temperature across the months from 2014 to 2023.
+:::
+
+## 4.3 CDA #3 - Are there certain locations “drier” or “wetter”/ “hotter” or “cooler”?
+
+## 4.3.1 Rainfall
+
+### 4.3.1.1 Rainfall across different weather stations
+
+```{r}
+rainfall_data_stn <- weather_data_detailed %>%   
+  group_by(station,year) %>%   
+  summarise(yearly_rainfall = sum(monthly_rainfall))  
+DT::datatable(rainfall_data_stn,class = "compact")
+```
+
+Saving it as a csv file:
+
+```{r}
+write_csv(rainfall_data_stn, "data/rainfall_data_stn.csv")
+```
+
+```{r,fig.height=6}
+p24 <- ggplot(rainfall_data_stn,
+             aes(y=yearly_rainfall,
+                 x = year,
+                 group = station,
+                 color = station)) +
+  geom_line() +
+  facet_wrap(~station,scales = "free_x") +
+  labs(title="Yearly rainfall across weather stations from 2014 to 2023",
+       y = "Rainfall volume (mm)",
+       x = "Year") +
+  theme_minimal() +
+  theme(axis.text.x=element_text(angle=90,hjust=1),panel.spacing.y = unit(5,"lines") )
+
+ggplotly(p24)
+```
+
+## Rainfall across Weather Stations
+
+**The hypothesis is as follows:**
+
+*H~0~: There is no difference between rainfall across weather stations.*
+
+*H~1~: There is a difference between rainfall across weather stations.*
+
+```{r,fig.width=12,fig.height=10}
+p25 <- ggbetweenstats(
+  data = weather_data_detailed,
+  x = station, 
+  y = monthly_rainfall,
+  type = "np",
+  pairwise.display = "significant",
+  conf.level = 0.95,
+  messages = FALSE,
+  title="Distribution of Rainfall by Station",
+  ylab = "Rainfall volume (mm)",
+  xlab = "Station",
+  ggsignif.args = list(textsize = 3)
+) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust = 1),
+        plot.title = element_text(size = 15),
+        text = element_text(size = 15))
+p25
+```
+
+The plot above shows that the p-value of the test is \< 0.05, for which we reject the null hypothesis at alpha = 0.05. **There is sufficient evidence to indicate that there is differences in rainfall across stations.**
+
+### 4.3.1.2 Temperature across different weather stations
+
+```{r}
+temp_stn <- weather_data_detailed %>%
+  group_by(station,year) %>%
+  summarise(meantemp = median(mean_monthly_temperature),
+            maxtemp = max(max_monthly_temperature),
+            mintemp = min(min_monthly_temperature))
+
+
+DT::datatable(temp_stn,class = "compact")
+```
+
+Saving it as a csv file:
+
+```{r}
+write_csv(temp_stn, "data/temp_stn.csv")
+```
+
+::: panel-tabset
+## Mean Temperature
+
+```{r}
+p26 <- ggplot(temp_stn,
+             aes(y = meantemp,
+                 x = year,
+                 group = station,
+                 color = station)) +
+  geom_line() +
+  facet_wrap(~station,scales = "free_x") +
+  labs(title="Mean temperature across weather stations from 2014 to 2023",
+       y = "Temperature (°C)",
+       x = "Year") +
+  theme_minimal() +
+  theme(axis.text.x=element_text(angle=90,hjust=1))
+
+p26 <- ggplotly(p26, tooltip="all",width = 800,height = 600) %>% 
+  layout(width = 800, height = 600)
+
+p26
+```
+
+## Maximum Temperature
+
+```{r}
+p27 <- ggplot(temp_stn,
+             aes(y = maxtemp,
+                 x = year,
+                 group = station,
+                 color = station)) +
+  geom_line() +
+  facet_wrap(~station,scales = "free_x") +
+  labs(title="Max temperature across weather stations from 2014 to 2023",
+       y = "Temperature (°C)",
+       x = "Year") +
+  theme_minimal() +
+  theme(axis.text.x=element_text(angle=90,hjust=1))
+
+p27 <- ggplotly(p27, tooltip="all",width = 800,height = 600) %>% 
+  layout(width = 800, height = 600)
+
+p27
+```
+
+Based on observation, it seems like max temperature for each weather station did not undergo significant changes over the years from 2014 to 2023.
+
+## Minimum Temperature
+
+```{r}
+p28 <- ggplot(temp_stn,
+             aes(y = mintemp,
+                 x = year,
+                 group = station,
+                 color = station)) +
+  geom_line() +
+  facet_wrap(~station,scales = "free_x") +
+  labs(title="Min temperature across weather stations from 2014 to 2023",
+       y = "Temperature (°C)",
+       x = "Year") +
+  theme_minimal() +
+  theme(axis.text.x=element_text(angle=90,hjust=1))
+
+p28 <- ggplotly(p28, tooltip="all",width = 800,height = 600) %>% 
+  layout(width = 800, height = 600)
+
+p28
+```
+:::
+
+```{r}
+combined_data3 <- reshape2::melt(temp_stn, id.vars = c("station", "year"), variable.name = "temperature_type")
+
+p29 <- ggplot(combined_data3, aes(x = year, 
+                                 y = value,
+                                 color = temperature_type)) +
+  geom_line() +
+  facet_wrap(~ station,scales = "free_x")+
+  labs(title = "Detailed Temperature Trends across stations from 2014 to 2023",
+       y = "Temperature (°C)",
+       x = "Year",
+       color = "Temperature Type") +
+  scale_x_continuous(breaks = seq(2014,2023, 1)) +
+  scale_color_manual(values = c("turquoise", "violetred2", "steelblue2"), 
+                      labels = c("Mean", "Max", "Min")) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1),
+        panel.border = element_rect(color = "lightgrey",linetype = "dashed", fill = NA, size = 1))
+
+p29 <- ggplotly(p29, tooltip = "all", width = 800, height = 600) %>% 
+  layout(width = 800, height = 600)
+
+p29
+```
+
+Saving *combined_data, combined_data2* and *combined_data3* as csv files:
+
+```{r}
+write_csv(combined_data, "data/combined_data.csv")
+write_csv(combined_data2, "data/combined_data2.csv")
+write_csv(combined_data3, "data/combined_data3.csv")
+```
+
+::: panel-tabset
+## Mean Temperature
+
+**The** **hypothesis is as follows:**
+
+*H~0~: There is no difference between mean temperature across weather stations.*
+
+*H~1~: There is a difference between mean temperature across weather stations.*
+
+```{r,fig.width=12,fig.height=10}
+p30 <- ggbetweenstats(
+  data = weather_data_detailed,
+  x = station, 
+  y = mean_monthly_temperature,
+  type = "np",
+  pairwise.display = "significant",
+  conf.level = 0.95,
+  messages = FALSE,
+  title="Distribution of Mean Temperature by Station",
+  ylab = "Temperature (°C)",
+  xlab = "Station",
+  ggsignif.args = list(textsize = 3)
+) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust = 1),
+        plot.title = element_text(size = 15),
+        text = element_text(size = 15))
+p30
+```
+
+The plot above shows p-value \< 0.05, for which the null hypothesis will be rejected at alpha = 0.05. There is sufficient evidence to indicate that there is a difference in the mean temperature across stations. This suggests that different regions of Singapore are hotter/cooler.
+
+## Maximum Temperature
+
+**The** **hypothesis is as follows:**
+
+*H~0~: There is no difference between maximum temperature across weather stations.*
+
+*H~1~: There is a difference between maximum temperature across weather stations.*
+
+```{r,fig.width=12,fig.height=10}
+p31 <- ggbetweenstats(
+  data = weather_data_detailed,
+  x = station, 
+  y = max_monthly_temperature,
+  type = "np",
+  pairwise.display = "significant",
+  conf.level = 0.95,
+  messages = FALSE,
+  title="Distribution of Max Temperature by Station",
+  ylab = "Temperature (°C)",
+  xlab = "Station",
+  ggsignif.args = list(textsize = 3)
+) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust = 1),
+        plot.title = element_text(size = 15),
+        text = element_text(size = 15))
+p31
+```
+
+The plot above shows p-value of the test \< 0.05, for which the null hypothesis will be rejected at alpha = 0.05. There is sufficient evidence to indicate that there is a difference in the max temperature across stations. This suggests that different regions of Singapore are hotter/cooler.
+
+## Minimum Temperature
+
+**The** **hypothesis is as follows:**
+
+*H~0~: There is no difference between minimum temperature across weather stations.*
+
+*H~1~: There is a difference between minimum temperature across weather stations.*
+
+```{r,fig.width=12,fig.height=10}
+p32 <- ggbetweenstats(
+  data = weather_data_detailed,
+  x = station, 
+  y = min_monthly_temperature,
+  type = "np",
+  pairwise.display = "significant",
+  conf.level = 0.95,
+  messages = FALSE,
+  title="Distribution of Min Temperature by Station",
+  ylab = "Temperature (°C)",
+  xlab = "Station",
+  ggsignif.args = list(textsize = 3)
+) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust = 1),
+        plot.title = element_text(size = 15),
+        text = element_text(size = 15))
+p32
+```
+
+The plot above shows p-value of the test is \< 0.05, for which the null hypothesis will be rejected at alpha = 0.05. There is sufficient evidence to indicate that there is a difference in the min temperature across stations. This suggests that different regions of Singapore are hotter/cooler.
+:::
+
+## 4.4 CDA Summary Table
+
++---------+--------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| S/N     | CDA                                                                      | Findings                                                                                                                                                                                                         |
++=========+==========================================================================+==================================================================================================================================================================================================================+
+| **1.1** | Are the changes in rainfall over the years statistically significant?    | -   **Over the years, the rainfall volume is generally observed to have increased.**                                                                                                                             |
+|         |                                                                          | -   Based on statistical analysis, we determined that there is **sufficient** evidence to indicate that **there is a difference in the rainfall across the years from 2014 to 2023.**                            |
++---------+--------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **1.2** | Are the changes in temperature over the years statistically significant? | -   Based on observation, it seemed like mean, max and min temperature did not undergo significant changes over the years from 2014 to 2023.                                                                     |
+|         |                                                                          | -   However, based on statistical tests, we determined that there is **sufficient** evidence to indicate that **there is a difference in the mean, max and min temperature across the years from 2014 to 2023.** |
++---------+--------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **2.1** | Are there really certain months “drier” or “wetter”?                     | -   Yes, there is **sufficient** evidence to indicate that there is a difference in the rainfall across the months.                                                                                              |
++---------+--------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **2.2** | Are there really certain months “hotter” or “cooler”?                    | -   Yes, there is **sufficient** evidence to indicate that there is a difference in the mean, max and min temperatures across the months.                                                                        |
++---------+--------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **3.1** | Are there certain locations “drier” or “wetter”?                         | -   Yes, there is **sufficient** evidence to indicate that there is differences in rainfall across stations, indicating different locations vary in degree of dryness/wetness.                                   |
++---------+--------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **3.2** | Are there certain locations “hotter” or “cooler”?                        | -   Yes, there is **sufficient** evidence to indicate that there is a difference in the mean, max and min temperatures across stations. This suggests that different regions of Singapore are hotter/cooler.     |
++---------+--------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+

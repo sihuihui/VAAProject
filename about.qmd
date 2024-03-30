@@ -1,9 +1,14 @@
 ---
 title: "About"
+about:
+  id: hero-heading
+  template: jolla
+  image: logo.png
 ---
 
-About this site
+:::{#hero-heading}
 
-```{r}
-1 + 1
-```
+Hi there, we are Group 12 of ISSS608 Visual Analytics & Applications AY2023-24 January Term!
+
+:::
+---

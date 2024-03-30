@@ -1,0 +1,30 @@
+---
+title: "Introduction"
+format:
+  html: 
+    theme: cosmo
+    grid: 
+      body-width: 1200px
+    fontsize: 1.1em
+page-layout: full
+toc: true 
+sidebar: false 
+number-sections: false
+---
+
+As a small, low-lying city-state, Singapore is vulnerable to the effects of climate change which has brought about more extreme weather patterns - rising sea levels, dry spells and intense rainfall which at times can lead to flash floods.
+
+![](images/clipboard-939414320.png){width="602"}
+
+According to an [infographic](https://www.nccs.gov.sg/singapores-climate-action/impact-of-climate-change-in-singapore/) above by the National Climate Change Secretariat Singapore:
+
+1.  Daily mean temperatures are projected to increase by 1.4 to 4.6 degrees celsius; and
+2.  The contrast between the wet months (November to January) and dry months (February and June to September) is likely to be more pronounced.
+
+In Jan 2024, the Centre for Climate Research Singapore (CCRS) announced the [Third National Climate Change Study (V3)](https://www.mss-int.sg/v3-climate-projections) which provided potential scenarios of our future based on low, medium, and high global greenhouse gas emissions.
+
+1.  Very hot days will become more frequent.
+2.  Extreme daily rainfall is projected to intensify.
+3.  The mean sea level around Singapore is projected to rise up to 1.15m by end century, and up to around 2m by 2150 under the high emissions scenario.
+
+It is important that we better understand how climate change has been affecting Singapore, by understanding the trends in our daily temperatures and rainfall over the years, and utilise historical data to forecast future climate data. It will provide guidance on whether and how Singapore will need to urgently develop ways to mitigate and adapt.
