@@ -1,0 +1,24 @@
+---
+title: "Group 12 Project Meeting Minutes"
+page-layout: full
+toc: false 
+sidebar: false 
+number-sections: false
+execute:
+  eval: true
+  echo: true
+  freeze: true
+  warning: false
+  message: false
+editor: visual
+---
+
+Refer to the links below for Group 12's meeting minutes:
+
+-   [Meeting 1](https://smu.sharepoint.com/:w:/t/VAAProject777/EUtIr37RT2xPrLcGYQBna0cBF4D-h1bR-Mz7XMl_sAZUgQ?e=mVLmZd)
+
+-   [Meeting 2](https://smu.sharepoint.com/:w:/t/VAAProject777/EeOpbftSYbNAv82M-Y9JSiYBTAO1tzT_MatOhNYoG3nT2A?e=mzhcCa)
+
+-   [Meeting 3](https://smu.sharepoint.com/:w:/t/VAAProject777/EcJcWD8f5aBFpXz6r2e-cGoBt59epWDCtvK2IpEv8CUevA?e=9zmeW4)
+
+-   [Meeting 4](https://smu.sharepoint.com/:w:/t/VAAProject777/Ec7rpLxLnmJAgXDDZS9soZgBfw9K4Trq0kYO0MKqP3Uesg?e=Ju7p6t)
