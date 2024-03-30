@@ -27,7 +27,7 @@ website:
           - text: Forecasting
             href: Analysis/Forecasting.html
       - text: ShinyApp
-        href: https://vaastormtroopers.shinyapps.io/VAAStormTroopers/
+        href: ShinyApp/ShinyApp.html
 
     right:
       - about.qmd

@@ -1,0 +1,23 @@
+---
+title: "Shiny Application"
+format:
+  html: 
+    theme: cosmo
+    grid: 
+      body-width: 1200px
+    fontsize: 1.1em
+page-layout: full
+toc: true 
+sidebar: false 
+number-sections: false
+---
+
+Click on the link below for our Shiny Application:
+
+::: {#fig-elephant}
+`<iframe width="560" height="315" src="https://vaastormtroopers.shinyapps.io/VAAStormTroopers/"`{=html}
+
+</iframe>
+:::
+
+Click below for the user guide to the Shiny Application:
