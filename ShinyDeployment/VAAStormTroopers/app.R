@@ -1,8 +1,7 @@
 pacman::p_load(tidyverse, shiny, bslib, 
                lubridate, DT, ggplot2, plotly, ggthemes, hrbrthemes, timetk, modeltime, tidymodels, 
                xgboost, recipes, parsnip, workflows, patchwork, thematic, showtext, glue, bsicons,
-               tmap, sf,terra, gstat, automap, ggstatsplot, ggridges,ggrepel,ggsignif,gifski, 
-               gganimate,ggiraph,magick,car, shinycssloaders
+               tmap,sf,terra, gstat, automap, ggstatsplot,ggridges,ggsignif,shinycssloaders
 )
 
 weatherdata <-read_rds("data/weather_data_imputed.rds")
@@ -18,8 +17,6 @@ weatherdata_summary <-  weatherdata %>%
 weatherdata_cda <- weatherdata %>%
   mutate(MONTH = month(tdate),
          YEAR = year(tdate))
-
-
 
 ##### Geospatial data #######
 wdata_sf <- read_rds("data/weatherdata_wstations.rds")
@@ -150,7 +147,7 @@ vbs <- list(
   value_box(
     title = "Highest Monthly Rainfall ",
     value = textOutput("highrain"),
-    showcase = bs_icon("cloud-rain-heavy", size = 40),
+    showcase = bs_icon("cloud-rain-heavy", size = 35),
     showcase_layout = "top right",
     theme = value_box_theme(bg = "#052E55", fg = "#DBDFE3"),
     full_screen = FALSE, fill = TRUE, height = NULL
@@ -161,7 +158,7 @@ vbs <- list(
   value_box(
     title = "Average Monthly Rainfall ",
     value = textOutput("avgrain"),
-    showcase = bs_icon("umbrella-fill", size = 40),
+    showcase = bs_icon("umbrella-fill", size = 35),
     showcase_layout = "top right",
     theme = value_box_theme(bg = "#0B63B5",fg = "#DBDFE3"),
     full_screen = FALSE, fill = TRUE, height = NULL
@@ -171,7 +168,7 @@ vbs <- list(
   value_box(
     title = "Lowest Monthly Rainfall ",
     value = textOutput("lowrain"),
-    showcase = bs_icon("cloud-drizzle", size = 40),
+    showcase = bs_icon("cloud-drizzle", size = 35),
     showcase_layout = "top right",
     theme = value_box_theme(bg = "#92BCE3", fg = "#1a1818"),
     full_screen = FALSE, fill = TRUE, height = NULL
@@ -468,7 +465,7 @@ ui <- page_navbar(
     title = "Forecasting",
     nav_panel(title = "ETS",
               navset_card_tab(
-                sidebar = sidebar("Please make the following selections",
+                sidebar = sidebar("Make the following selections",
                                   selectInput(inputId = "sh_station",
                                               label = "Weather Station",
                                               choices = c("Admiralty" = "Admiralty",
@@ -560,37 +557,214 @@ ui <- page_navbar(
                               actionButton(inputId = "sh_forecast",
                                            label = "Initiate Validation and Forecasting")
                             ), 
-                            card(plotlyOutput("sh_ValidationPlot")%>% withSpinner(color="#0B63B5"),
-                                 fill = FALSE),
-                            card(plotlyOutput("sh_ForecastPlot")%>% withSpinner(color="#0B63B5"), 
-                                 fill = FALSE),
-                            layout_column_wrap(
-                              value_box(
+                            layout_columns(
+                              col_widths = c(12,12,4,4,4),
+                              row_heights = c(3,3,1), 
+                            card(
+                              card_body(plotlyOutput("sh_ValidationPlot"), class = "p-0")%>% 
+                                   withSpinner(color="#0B63B5")),
+                            card(card_body(plotlyOutput("sh_ForecastPlot"), class = "p-0") %>% 
+                                   withSpinner(color="#0B63B5")),
+                            card(card_body(value_box(
                                 title = "MAE",
                                 value = textOutput("mae"),
-                                theme = value_box_theme(bg = "#FDF8AC", fg = "#080707"),
-                                #full_screen = FALSE, fill = TRUE, height = NULL
-                              ),
-                              value_box(
+                                theme = value_box_theme(bg = "#FDF8AC", fg = "#080707")), class = "p-0")),
+                            card(card_body(value_box(
                                 title = "MAPE",
                                 value = textOutput("mape"),
-                                theme = value_box_theme(bg = "#FDF8AC", fg = "#080707"),
-                                #full_screen = FALSE, fill = TRUE, height = NULL
-                              ),
-                              value_box(
+                                theme = value_box_theme(bg = "#FDF8AC", fg = "#080707")), class = "p-0")),
+                            card(card_body(value_box(
                                 title = "RMSE",
                                 value = textOutput("rmse"),
-                                theme = value_box_theme(bg = "#FDF8AC", fg = "#080707"),
-                                #full_screen = FALSE, fill = TRUE, height = NULL
-                              ))
-                            
+                                theme = value_box_theme(bg = "#FDF8AC", fg = "#080707")),class = "p-0")))
                           ))
               )),# end of ETS
     nav_panel(title = "ARIMA",
-              
-              
-              
-    ), #end of ARIMA nav_panel 
+              navset_card_tab(
+                sidebar = sidebar("Make the following selections",
+                                  selectInput(inputId = "arima_station",
+                                              label = "Weather Station",
+                                              choices = c("Admiralty" = "Admiralty",
+                                                          "Ang Mo Kio" = "Ang Mo Kio",
+                                                          "Changi" = "Changi", 
+                                                          "Choa Chu Kang (South)" = "Choa Chu Kang (South)",
+                                                          "Clementi" = "Clementi",
+                                                          "East Coast Parkway" = "East Coast Parkway",
+                                                          "Jurong Island" = "Jurong Island",
+                                                          "Jurong (West)" = "Jurong (West)",
+                                                          "Newton" = "Newton",
+                                                          "Pasir Panjang" = "Pasir Panjang", 
+                                                          "Sentosa Island"  = "Sentosa Island",
+                                                          "Tai Seng" = "Tai Seng",
+                                                          "Tuas South" = "Tuas South"),
+                                              selected = "Changi"),
+                                  selectInput(inputId = "arima_variable",
+                                              label = "Variable to forecast",
+                                              choices = c("Mean Temperature" = "mean_monthly_temperature",
+                                                          "Maximum Temperature" = "max_monthly_temperature",
+                                                          "Minimum Temperature" = "min_monthly_temperature",
+                                                          "Total Rainfall" = "monthly_rainfall"),
+                                              selected = "mean_monthly_temperature")),
+                nav_panel("ACF Decomposition",
+                          navset_card_tab(
+                            sidebar = sidebar(
+                              sliderInput(inputId = "arima_lags",
+                                          label = "Specify the lags",
+                                          min = 1,
+                                          max = 1000,
+                                          value = 1000,
+                                          step = 1),
+                              actionButton(inputId = "arima_decompose",
+                                           label = "Initiate Decomposition")
+                            ),card(plotlyOutput("arima_DecompositionPlot") %>% withSpinner(color="#0B63B5"))
+                          )),
+                
+                nav_panel("Auto ARIMA",
+                          navset_card_tab(
+                            sidebar = sidebar(
+                              sliderInput("arima_auto_traindata",
+                                          label = "Select Amount of Training Data to use", 
+                                          min = 0.6,
+                                          max = 1,
+                                          value = 0.8,
+                                          step = 0.05),
+                              
+                              sliderInput("arima_auto_forecasthorizon",
+                                          label = "Select Forecast Horizon", 
+                                          min = 1,
+                                          max = 120,
+                                          value = 36,
+                                          step = 1),
+                              
+                              actionButton(inputId = "arima_auto",
+                                           label = "Initiate Validation and Decomposition")),
+                            
+                            layout_columns(
+                              col_widths = c(12,4,4,4),
+                              row_heights = c(4,1), 
+                              card(
+                                navset_tab(
+                                  nav_panel("Validation Plot",
+                                            card(card_body(plotlyOutput("arima_auto_validate")%>% 
+                                                             withSpinner(color="#0B63B5"), class = "p-0"))),
+                                  
+                                  nav_panel("Forecast Plot", 
+                                            card(card_body(plotlyOutput("arima_auto_forecast")%>% 
+                                                             withSpinner(color="#0B63B5"), class = "p-0"))))),
+                              
+                              card(card_body(value_box(
+                                title = "MAE",
+                                value = textOutput("auto_mae"),
+                                theme = value_box_theme(bg = "#FDF8AC", fg = "#080707")), class = "p-0")),
+                              card(card_body(value_box(
+                                title = "MAPE",
+                                value = textOutput("auto_mape"),
+                                theme = value_box_theme(bg = "#FDF8AC", fg = "#080707")), class = "p-0")),
+                              card(card_body(value_box(
+                                title = "RMSE",
+                                value = textOutput("auto_rmse"),
+                                theme = value_box_theme(bg = "#FDF8AC", fg = "#080707")),class = "p-0")))
+                            
+                          )),
+                
+                nav_panel("Standard ARIMA",
+                          navset_card_tab(
+                            sidebar = sidebar(
+                              sliderInput("arima_std_traindata",
+                                          label = "Select Amount of Training Data to use", 
+                                          min = 0.6,
+                                          max = 1,
+                                          value = 0.8,
+                                          step = 0.05),
+                              
+                              sliderInput("arima_std_forecasthorizon",
+                                          label = "Select Forecast Horizon", 
+                                          min = 1,
+                                          max = 120,
+                                          value = 36,
+                                          step = 1),
+                              
+                              sliderInput("arima_std_seasonalperiod",
+                                          label = "Select Seasonal Period", 
+                                          min = 0,
+                                          max = 12,
+                                          value = 12,
+                                          step = 1),
+                              
+                              sliderInput("arima_std_nonseasonal_ar",
+                                          label = "Select Non-Seasonal AR (p)", 
+                                          min = 0,
+                                          max = 5,
+                                          value = 0,
+                                          step = 1),
+                              
+                              sliderInput("arima_std_nonseasonal_diff",
+                                          label = "Select Non-Seasonal Differences (d)", 
+                                          min = 0,
+                                          max = 2,
+                                          value = 0,
+                                          step = 1),
+                              
+                              sliderInput("arima_std_nonseasonal_ma",
+                                          label = "Select Non-Seasonal MA (q)", 
+                                          min = 0,
+                                          max = 5,
+                                          value = 0,
+                                          step = 1),
+                              
+                              sliderInput("arima_std_seasonal_ar",
+                                          label = "Select Seasonal AR (P)", 
+                                          min = 0,
+                                          max = 2,
+                                          value = 0,
+                                          step = 1),
+                              
+                              sliderInput("arima_std_seasonal_diff",
+                                          label = "Select Seasonal Differences (D)", 
+                                          min = 0,
+                                          max = 1,
+                                          value = 0,
+                                          step = 1),
+                              
+                              sliderInput("arima_std_seasonal_ma",
+                                          label = "Select Seasonal MA (Q)", 
+                                          min = 0,
+                                          max = 2,
+                                          value = 0,
+                                          step = 1),
+                              
+                              actionButton(inputId = "arima_std",
+                                           label = "Initiate Validation and Forecasting")),
+                            
+                            layout_columns(
+                              col_widths = c(12,4,4,4),
+                              row_heights = c(4,1), 
+                              card(
+                                navset_tab(
+                                  nav_panel("Validation Plot",
+                                            card(card_body(plotlyOutput("arima_std_validate")%>% 
+                                                             withSpinner(color="#0B63B5"), class = "p-0"))),
+                                  
+                                  nav_panel("Forecast Plot", 
+                                            card(card_body(plotlyOutput("arima_std_forecast")%>% 
+                                                             withSpinner(color="#0B63B5"), class = "p-0"))))),
+                              
+                              card(card_body(value_box(
+                                title = "MAE",
+                                value = textOutput("std_mae"),
+                                theme = value_box_theme(bg = "#FDF8AC", fg = "#080707")), class = "p-0")),
+                              card(card_body(value_box(
+                                title = "MAPE",
+                                value = textOutput("std_mape"),
+                                theme = value_box_theme(bg = "#FDF8AC", fg = "#080707")), class = "p-0")),
+                              card(card_body(value_box(
+                                title = "RMSE",
+                                value = textOutput("std_rmse"),
+                                theme = value_box_theme(bg = "#FDF8AC", fg = "#080707")),class = "p-0")))
+                            
+                          ))
+
+    )), #end of ARIMA nav_panel 
     align = "left"
   )
 )
@@ -1127,6 +1301,207 @@ server <- function(input, output){
   output$rmse <- renderText({
     round(forecast_table()$rmse,2)
   })
+  
+  ##### ARIMA START#####
+  selectedDataA <- eventReactive(input$arima_decompose, {
+    weatherdata %>%
+      filter(station %in% input$arima_station)%>%
+      select(station, date = tdate, value = input$arima_variable)
+  })
+  
+  output$arima_DecompositionPlot <- renderPlotly({
+    req(selectedDataA())
+    plot_acf_diagnostics(selectedDataA(), date, value,
+                         .lags = input$arima_lags)
+  })
+  
+  ## AUTO ARIMA ## 
+  ## split the data based on the training proportion chosen 
+  splitsAUTO <- eventReactive(input$arima_auto,{
+    req(selectedDataA())
+    initial_time_split(selectedDataA(), prop = input$arima_auto_traindata)
+  })
+  
+  train_dataAUTO <- reactive({ 
+    training(splitsAUTO()) 
+  })
+  
+  test_dataAUTO <- reactive({ 
+    testing(splitsAUTO()) 
+  })
+  
+  model_fit_autoarima_no_boost <- reactive({
+    arima_reg() %>%
+      set_engine(engine = "auto_arima") %>%
+      fit(value ~ date, data = train_dataAUTO())
+  })
+  
+  ## Add Fitted Model to a Model table 
+  model_autoarima_table <- reactive({
+    req(model_fit_autoarima_no_boost())
+    modeltime_table(model_fit_autoarima_no_boost())
+  })
+  
+  ## Calibrate model to test data
+  calibration_autoarima_no_boost <- reactive({
+    req(model_autoarima_table(), test_dataAUTO())
+    model_autoarima_table() %>%
+      modeltime_calibrate(new_data = test_dataAUTO())
+  })
+  
+  calibration_resultsAUTO <- reactive({
+    req(calibration_autoarima_no_boost())
+    calibration_autoarima_no_boost() %>%
+      modeltime_forecast(new_data = test_dataAUTO(),
+                         actual_data = selectedDataA())
+  })
+  
+  ## Plot forecasted and actual test data
+  output$arima_auto_validate <- renderPlotly({
+    req(calibration_resultsAUTO())
+    calibration_resultsAUTO() %>%
+      plot_modeltime_forecast(.title = "Plot for test data")
+  })
+  
+  ## refit to full dataset & forecast forward 
+  refitAUTO <- reactive({
+    calibration_autoarima_no_boost() %>%
+      modeltime_refit(data = selectedDataA())
+  })
+  
+  ## Plot the forecasted horizon 
+  output$arima_auto_forecast <- renderPlotly({
+    req(refitAUTO())
+    refitAUTO() %>%
+      modeltime_forecast(h = input$arima_auto_forecasthorizon, actual_data = selectedDataA()) %>%
+      plot_modeltime_forecast() 
+  })
+  
+  calibration_tableAUTO <- reactive({
+    req(model_autoarima_table(), test_dataAUTO())
+    model_autoarima_table() %>%
+      modeltime_calibrate(test_dataAUTO())
+  })
+  
+  forecast_tableAUTO <- reactive({
+    req(calibration_tableAUTO)
+    calibration_tableAUTO() %>%
+      modeltime_accuracy() %>%
+      select(.model_desc, mae, mape, mase, rmse)
+  })
+  
+  output$auto_mae <- renderText({
+    round(forecast_tableAUTO()$mae,2)
+  })
+  
+  output$auto_mape <- renderText({
+    round(forecast_tableAUTO()$mape,2)
+  })
+  
+  output$auto_rmse <- renderText({
+    round(forecast_tableAUTO()$rmse,2)
+  })
+  
+  ### AUTO ARIMA END #####
+  
+  ### STANDARD ARIMA START ######
+  ## split the data based on the training proportion chosen 
+  splitsSTD <- eventReactive(input$arima_std,{
+    req(selectedDataA())
+    initial_time_split(selectedDataA(), prop = input$arima_std_traindata)
+  })
+  
+  train_dataSTD <- reactive({ 
+    training(splitsSTD()) 
+  })
+  
+  test_dataSTD<- reactive({ 
+    testing(splitsSTD()) 
+  })
+  
+  model_fit_stdarima_no_boost <- reactive({
+    arima_reg(
+      seasonal_period = input$arima_std_seasonalperiod,
+      non_seasonal_ar = input$arima_std_nonseasonal_ar, 
+      non_seasonal_differences = input$arima_std_nonseasonal_diff,
+      non_seasonal_ma = input$arima_std_nonseasonal_ma,
+      seasonal_ar = input$arima_std_seasonal_ar,
+      seasonal_differences = input$arima_std_seasonal_diff,
+      seasonal_ma = input$arima_std_seasonal_ma
+    ) %>%
+      set_engine(engine = "arima") %>%
+      fit(value ~ date, data = train_dataSTD())
+  })
+  
+  ## Add Fitted Model to a Model table 
+  model_arima_table <- reactive({
+    req(model_fit_stdarima_no_boost())
+    modeltime_table(model_fit_stdarima_no_boost())
+  })
+  
+  ## Calibrate model to test data
+  calibration_arima_no_boost <- reactive({
+    req(model_arima_table(), test_dataSTD())
+    model_arima_table() %>%
+      modeltime_calibrate(new_data = test_dataSTD())
+  })
+  
+  calibration_resultsSTD <- reactive({
+    req(calibration_arima_no_boost())
+    calibration_arima_no_boost() %>%
+      modeltime_forecast(new_data = test_dataSTD(),
+                         actual_data = selectedDataA())
+  })
+  
+  ## Plot forecasted and actual test data
+  output$arima_std_validate <- renderPlotly({
+    req(calibration_resultsSTD())
+    calibration_resultsSTD() %>%
+      plot_modeltime_forecast(.title = "Plot for test data")
+  })
+  
+  ## refit to full dataset & forecast forward 
+  refitSTD <- reactive({
+    calibration_arima_no_boost() %>%
+      modeltime_refit(data = selectedDataA())
+  })
+  
+  ## Plot the forecasted horizon 
+  output$arima_std_forecast <- renderPlotly({
+    req(refitSTD())
+    refitSTD() %>%
+      modeltime_forecast(h = input$arima_std_forecasthorizon, actual_data = selectedDataA()) %>%
+      plot_modeltime_forecast() 
+  })
+  
+  calibration_tableSTD <- reactive({
+    req(model_arima_table(), test_dataSTD())
+    model_arima_table() %>%
+      modeltime_calibrate(test_dataSTD())
+  })
+  
+  forecast_tableSTD <- reactive({
+    req(calibration_tableSTD)
+    calibration_tableSTD() %>%
+      modeltime_accuracy() %>%
+      select(.model_desc, mae, mape, mase, rmse)
+  })
+  
+  output$std_mae <- renderText({
+    round(forecast_tableSTD()$mae,2)
+  })
+  
+  output$std_mape <- renderText({
+    round(forecast_tableSTD()$mape,2)
+  })
+  
+  output$std_rmse <- renderText({
+    round(forecast_tableSTD()$rmse,2)
+  })
+  
+  
+  ### STANDARD ARIMA END ######
+  
   ############# End of Validation and Forecast Page Server ########################
   
 }
