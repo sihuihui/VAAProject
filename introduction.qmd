@@ -1,5 +1,5 @@
 ---
-title: "Introduction - Rain or Shine: Unveiling The Mysteries of Singapore Weather"
+title: "Rain or Shine: Unveiling The Mysteries of Singapore Weather"
 format:
   html: 
     theme: cosmo
@@ -11,6 +11,8 @@ toc: true
 sidebar: false 
 number-sections: false
 ---
+
+# Introduction
 
 # 1. The Motivation
 
@@ -47,4 +49,4 @@ Our group utilised data from [weather.gov.sg](https://www.weather.gov.sg/home/) 
 
 # 3. The Application
 
-The group showcased our discoveries through our [Shiny Application](ShinyApp/ShinyApp.html) enabling analysts and policymakers to grasp the impacts of climate change on Singapore. Users can gain insights from the historical trends of temperatures and rainfall, and the forecasts of our future climate conditions.
+The group showcased our discoveries through our [Shiny Application](ShinyApp/ShinyApp.html) to enable users such as analysts and policymakers to grasp the impacts of climate change on Singapore. Users can gain insights from the historical trends of temperatures and rainfall, and the forecasts of our future climate conditions.
