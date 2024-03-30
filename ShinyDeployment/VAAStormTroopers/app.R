@@ -449,7 +449,7 @@ ui <- page_navbar(
                                 
                                 selectInput(inputId = "cda_pairwise",
                                             label = "Pairwise Display",
-                                            choices = list("significant" = "s", "non-significant" = "ns"),
+                                            choices = list("Significant" = "s", "Non-significant" = "ns"),
                                             selected = "s"),
                                 
                                 actionButton(inputId = "cda_plotdata",
@@ -465,7 +465,7 @@ ui <- page_navbar(
             )), # End of CDA 
   nav_menu(
     title = "Forecasting",
-    nav_panel(title = "Exponential Smoothing",
+    nav_panel(title = "ETS",
               navset_card_tab(
                 sidebar = sidebar("Please make the following selections",
                                   selectInput(inputId = "sh_station",
@@ -492,8 +492,8 @@ ui <- page_navbar(
                                                           "Total Rainfall" = "monthly_rainfall"),
                                               selected = "mean_monthly_temperature"), 
                                   actionButton(inputId = "sh_plotdata",
-                                               label = "Start Decomposition")),
-                nav_panel("Seasonal-Trend-Loess (STL) Decomposition",
+                                               label = "Initiate Decomposition")),
+                nav_panel("Seasonal-Trend-Loess Decomposition",
                           layout_sidebar(
                             sidebar = sidebar(
                               checkboxGroupInput(inputId = "sh_decompose",
@@ -504,20 +504,20 @@ ui <- page_navbar(
                                                              "Remainder" = "remainder",
                                                              "Seasonal Adjusted" = "seasadj"),
                                                  selected = c("observed","season", "trend", "remainder"))),
-                            card_body(plotOutput("sh_DecompositionPlot")))                   
+                            card_body(plotlyOutput("sh_DecompositionPlot")))                   
                 ),
                 nav_panel("Validation and Forecasting",
                           layout_sidebar(
                             sidebar = sidebar(
                               sliderInput("sh_traindata",
-                                          label = "Select the amount of Training Data to use", 
+                                          label = "Select Amount of Training Data to use", 
                                           min = 0.6,
                                           max = 1,
                                           value = 0.8,
                                           step = 0.05),
                               
                               sliderInput("sh_forecasthorizon",
-                                          label = "Select the Forecast Horizon", 
+                                          label = "Select Forecast Horizon", 
                                           min = 1,
                                           max = 120,
                                           value = 36,
@@ -559,32 +559,26 @@ ui <- page_navbar(
                               actionButton(inputId = "sh_forecast",
                                            label = "Initiate Validation and Forecasting")
                             ), 
-                            card(plotOutput("sh_ValidationPlot")),
-                            card(plotOutput("sh_ForecastPlot")),
+                            card(plotlyOutput("sh_ValidationPlot")),
+                            card(plotlyOutput("sh_ForecastPlot")),
                             layout_column_wrap(
                               value_box(
                                 title = "MAE",
                                 value = textOutput("mae"),
-                                #showcase = bs_icon("clipboard2-check"),
-                                #showcase_layout = "top right",
                                 theme = value_box_theme(bg = "#FDF8AC", fg = "#080707"),
-                                full_screen = FALSE, fill = TRUE, height = NULL
+                                #full_screen = FALSE, fill = TRUE, height = NULL
                               ),
                               value_box(
                                 title = "MAPE",
                                 value = textOutput("mape"),
-                                #showcase = bs_icon("clipboard2-check"),
-                                #showcase_layout = "top right",
                                 theme = value_box_theme(bg = "#FDF8AC", fg = "#080707"),
-                                full_screen = FALSE, fill = TRUE, height = NULL
+                                #full_screen = FALSE, fill = TRUE, height = NULL
                               ),
                               value_box(
                                 title = "RMSE",
                                 value = textOutput("rmse"),
-                                #showcase = bs_icon("clipboard2-check"),
-                                #showcase_layout = "top right",
                                 theme = value_box_theme(bg = "#FDF8AC", fg = "#080707"),
-                                full_screen = FALSE, fill = TRUE, height = NULL
+                                #full_screen = FALSE, fill = TRUE, height = NULL
                               ))
                             
                           ))
@@ -969,11 +963,11 @@ server <- function(input, output){
       pairwise.display = input$cda_pairwise,
       conf.level = input$cda_conflevel,
       results.subtitle = TRUE,
-      messages = FALSE
-      #title="Distribution of Rainfall across 10 years (2014 to 2023)",
-      #ylab = "Rainfall volume (mm)",
-      #xlab = "Year",
-      #ggsignif.args = list(textsize = 5)
+      messages = FALSE, 
+      title= paste("Comparison of", input$cda_variable,"across 10 years (2014 to 2023)"),
+      ylab = input$cda_variable,
+      xlab = "Years",
+      ggsignif.args = list(textsize = 5)
     ) 
   })
   
@@ -987,11 +981,11 @@ server <- function(input, output){
       pairwise.display = input$cda_pairwise,
       conf.level = input$cda_conflevel,
       results.subtitle = TRUE,
-      messages = FALSE
-      #title="Distribution of Rainfall across 10 years (2014 to 2023)",
-      #ylab = "Rainfall volume (mm)",
-      #xlab = "Year",
-      #ggsignif.args = list(textsize = 5)
+      messages = FALSE,
+      title= paste("Comparison of", input$cda_variable, "across months"),
+      ylab = input$cda_variable,
+      xlab = "Months",
+      ggsignif.args = list(textsize = 5)
     ) 
   })
   
@@ -1004,11 +998,11 @@ server <- function(input, output){
       pairwise.display = input$cda_pairwise,
       conf.level = input$cda_conflevel,
       results.subtitle = TRUE,
-      messages = FALSE
-      #title="Distribution of Rainfall across 10 years (2014 to 2023)",
-      #ylab = "Rainfall volume (mm)",
-      #xlab = "Year",
-      #ggsignif.args = list(textsize = 5)
+      messages = FALSE,
+      title= paste("Comparison of", input$cda_variable, "across weather stations"),
+      ylab = input$cda_variable,
+      xlab = "Weather Stations",
+      ggsignif.args = list(textsize = 5)
     ) 
   })
   
@@ -1023,11 +1017,15 @@ server <- function(input, output){
       select(station, date = tdate, value = input$sh_variable)
   })
   
-  output$sh_DecompositionPlot <- renderPlot({
+  output$sh_DecompositionPlot <- renderPlotly({
     req(selectedData())
     plot_stl_diagnostics(selectedData(), date, value,
-                         .feature_set = input$sh_decompose,
-                         .interactive = FALSE)
+                         .feature_set = input$sh_decompose) %>%
+      layout(xaxis = list(tickfont = list(size = 12)),
+             yaxis = list(tickfont = list(size = 12)),
+             strip.text.x = element_text(size=15)
+             ) 
+      
   })
   ############# Decomposition Page Server ########################
   
@@ -1081,10 +1079,10 @@ server <- function(input, output){
   })
   
   ## Plot forecasted and actual test data
-  output$sh_ValidationPlot <- renderPlot({
+  output$sh_ValidationPlot <- renderPlotly({
     req(calibration_results())
     calibration_results() %>%
-      plot_modeltime_forecast(.interactive = FALSE, .title = "Plot using Test Data")
+      plot_modeltime_forecast(.title = "Plot using Test Data")
   })
   
   ## refit to full dataset & forecast forward 
@@ -1094,11 +1092,11 @@ server <- function(input, output){
   })
   
   ## Plot the forecasted horizon 
-  output$sh_ForecastPlot <- renderPlot({
+  output$sh_ForecastPlot <- renderPlotly({
     req(refit())
     refit() %>%
       modeltime_forecast(h = input$sh_forecasthorizon, actual_data = selectedData()) %>%
-      plot_modeltime_forecast(.interactive = FALSE) 
+      plot_modeltime_forecast( .title = "Plot based on Forecast Horizon") 
   })
   
   
