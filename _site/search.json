@@ -382,7 +382,7 @@
     "href": "ShinyApp/ShinyApp.html",
     "title": "Shiny Application",
     "section": "",
-    "text": "Click on the link below for our Shiny Application:\n\n\n\n\n\nClick below for the user guide to the Shiny Application:"
+    "text": "Click on the link below for our Shiny Application:\n\n\n\n\n\nClick below for the user guide to the Shiny Application:\n\n\n&lt;p&gt;This is an embedded &lt;a target=\"_blank\" href=\"https://office.com\"&gt;Microsoft Office&lt;/a&gt; presentation, powered by &lt;a target=\"_blank\" href=\"https://office.com/webapps\"&gt;Office&lt;/a&gt;.&lt;/p&gt;"
   },
   {
     "objectID": "Analysis/Dataprep.html",
