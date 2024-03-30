@@ -14,10 +14,6 @@ number-sections: false
 
 Click on the link below for our Shiny Application:
 
-::: {#fig-elephant}
-`<iframe width="560" height="315" src="https://vaastormtroopers.shinyapps.io/VAAStormTroopers/"`{=html}
-
-</iframe>
-:::
+[![](/shinyapp.png){fig-align="center" width="709"}](https://vaastormtroopers.shinyapps.io/VAAStormTroopers/)
 
 Click below for the user guide to the Shiny Application:
