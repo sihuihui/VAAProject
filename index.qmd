@@ -17,6 +17,7 @@ number-sections: false
 :::
 
 You may wish to explore our website in the following order: 
+
 ---
 listing:
   contents:
@@ -26,6 +27,7 @@ listing:
   - "Analysis/CDA.qmd"
   - "Analysis/Forecasting.qmd"
   - "ShinyApp/ShinyApp.qmd"
+  - "Poster.qmd"
   type: grid
   sort: false
 ---

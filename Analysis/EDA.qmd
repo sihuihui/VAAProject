@@ -12,7 +12,7 @@ number-sections: true
 editor: visual
 ---
 
-# 1. Issues to address
+# Issues to address
 
 The group's exploratory data analysis seeks to address the following:
 
@@ -22,7 +22,7 @@ The group's exploratory data analysis seeks to address the following:
 
 -   data visualisations of rainfall by years, months and stations.
 
-# **2. Installing and loading the required libraries**
+# Installing and loading the required libraries
 
 The following code chunk is used to install the necessary R packages:
 
@@ -36,7 +36,7 @@ pacman::p_load(tidyverse, shiny, bslib,lubridate, DT, ggplot2, plotly, ggthemes,
                gifski,gganimate, ggiraph, magick, car)
 ```
 
-# **3. Importing the Dataset**
+# Importing the Dataset
 
 ```{r}
 #| code-fold: true
@@ -53,7 +53,7 @@ DT::datatable(data, class = "display compact", style = "bootstrap5")
 
 ```
 
-## **3.1 Adding year and month columns - for ease of analysis**
+## Adding year and month columns - for ease of analysis
 
 For ease of analysis for EDA, the DATE in *data* was further broken down into year and month and added as columns:
 
@@ -66,9 +66,9 @@ data <- data %>%
 glimpse(data)
 ```
 
-# **4. Exploratory Data Analysis (EDA)**
+# Exploratory Data Analysis (EDA)
 
-## **4.1 Correlation Analysis**
+## Correlation Analysis
 
 In each of the tabsets below, we will examine the correlation between the weather variables (i.e., mean temperature, minimum temperature, maximum temperature and rainfall.
 
@@ -202,7 +202,7 @@ ggscatterstats(
 ```
 :::
 
-## **4.2 Exploring relationships for temperature/ rainfall between stations**
+## Exploring relationships for temperature/ rainfall between stations
 
 ::: panel-tabset
 ### Mean Temp by Station
@@ -406,7 +406,7 @@ ggplot(data,
 ```
 :::
 
-## **4.3 Exploring relationships for temperature/ rainfall across years**
+## Exploring relationships for temperature/ rainfall across years
 
 ::: panel-tabset
 ## Mean Temp by Year
@@ -620,7 +620,7 @@ p9
 ```
 :::
 
-## **4.4 Exploring relationships for temperature/ rainfall across months**
+## Exploring relationships for temperature/ rainfall across months
 
 ::: panel-tabset
 ## Mean Temp by Month

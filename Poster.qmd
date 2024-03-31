@@ -1,0 +1,13 @@
+---
+title: "Poster"
+format:
+  html: 
+    theme: cosmo
+    grid: 
+      body-width: 1200px
+    fontsize: 1.1em
+page-layout: full
+toc: false 
+sidebar: false 
+number-sections: false
+---
