@@ -18,6 +18,21 @@ weatherdata_cda <- weatherdata %>%
   mutate(MONTH = month(tdate),
          YEAR = year(tdate))
 
+month_names <- c(
+  "1" = "Jan",
+  "2" = "Feb",
+  "3" = "Mar",
+  "4" = "Apr",
+  "5" = "May",
+  "6" = "Jun",
+  "7" = "Jul",
+  "8" = "Aug",
+  "9" = "Sep",
+  "10" = "Oct",
+  "11" = "Nov",
+  "12" = "Dec")
+
+
 ##### Geospatial data #######
 wdata_sf <- read_rds("data/weatherdata_wstations.rds")
 
@@ -637,7 +652,7 @@ ui <- page_navbar(
                                           step = 1),
                               
                               actionButton(inputId = "arima_auto",
-                                           label = "Initiate Validation and Decomposition")),
+                                           label = "Initiate Validation and Forecasting")),
                             
                             layout_columns(
                               col_widths = c(12,4,4,4),
@@ -932,7 +947,8 @@ server <- function(input, output){
                     y = "Rainfall volume (mm)",
                     x = "Month") +
                theme_minimal()+
-               theme(panel.spacing.y = unit(0.3, "lines"),text=element_text(size=10),
+               theme(panel.spacing.y = unit(1, "lines"),
+                     text=element_text(size=10),
                      legend.position = "none")+
                scale_fill_discrete(name = "Year"))
   })
@@ -951,13 +967,14 @@ server <- function(input, output){
                  linetype=6,
                  colour="red",
                  size=0.5)+
-      facet_wrap(~month, scales = "free")+
+      facet_wrap(~month, scales = "free", labeller = as_labeller(month_names))+
       labs(title = "Rainfall by Months from 2014 to 2023",
            colour = "Month") +
       xlab("Year")+
       ylab("Rainfall volume (mm)")+
       theme_minimal(base_family = "Helvetica")+ 
       theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 1),
+            panel.spacing.y = unit(1,"lines"),
             legend.position = "none")
     
   })
@@ -975,13 +992,14 @@ server <- function(input, output){
                  linetype=6,
                  colour="red",
                  size=0.5)+
-      facet_wrap(~month,scales = "free")+
+      facet_wrap(~month,scales = "free", labeller = as_labeller(month_names))+
       labs(title = "Mean temperature by Months from 2014 to 2023")+
       xlab("Year")+
       ylab("Degrees (°C)")+
       #scale_color_discrete(name = "Year")+
       theme_minimal(base_family = "Helvetica")+
       theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 1),
+            panel.spacing.y = unit(1,"lines"),
             legend.position = "none")
   })
 
@@ -998,13 +1016,14 @@ server <- function(input, output){
                  linetype=6,
                  colour="red",
                  size=0.5)+
-      facet_wrap(~month,scales = "free")+
+      facet_wrap(~month, scales = "free", labeller = as_labeller(month_names))+
       labs(title = "Max temperature by Months from 2014 to 2023")+
       xlab("Year")+
       ylab("Degrees (°C)")+
       #scale_color_discrete(name = "Year")+
       theme_minimal(base_family = "Helvetica")+
       theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 1),
+            panel.spacing.y = unit(1,"lines"),
             legend.position = "none")
 
   })
@@ -1021,13 +1040,14 @@ server <- function(input, output){
                  linetype=6,
                  colour="red",
                  size=0.5)+
-      facet_wrap(~month,scales = "free")+
-      labs(title = "Max temperature by Months from 2014 to 2023")+
+      facet_wrap(~month,scales = "free", labeller = as_labeller(month_names))+
+      labs(title = "Min temperature by Months from 2014 to 2023")+
       xlab("Year")+
       ylab("Degrees (°C)")+
       #scale_color_discrete(name = "Year")+
       theme_minimal(base_family = "Helvetica")+
       theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 1),
+            panel.spacing.y = unit(1,"lines"),
             legend.position = "none")
     
   })
@@ -1048,7 +1068,7 @@ server <- function(input, output){
                     x = "Year") +
                theme_minimal() +
                theme(axis.text.x=element_text(angle=90,hjust=1),
-                     panel.spacing.y = unit(0.05,"lines"),
+                     panel.spacing.y = unit(1,"lines"),
                      legend.position = "none")) 
     
   })
@@ -1069,7 +1089,7 @@ server <- function(input, output){
                          labels = c("Mean", "Max", "Min")) +
       theme_minimal() +
       theme(axis.text.x = element_text(angle = 90, hjust = 1),
-            panel.spacing.y = unit(0.05,"lines"),
+            panel.spacing.y = unit(1,"lines"),
             #panel.border = element_rect(color = "lightgrey",linetype = "dashed", fill = NA, size = 1)
             )
     
