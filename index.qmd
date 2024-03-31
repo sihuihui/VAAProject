@@ -16,7 +16,7 @@ number-sections: false
 ![](images/coverpage-01.png)
 :::
 
-You may wish to explore our website in the following order: 
+You may wish to explore our website in the following order:
 
 ---
 listing:
