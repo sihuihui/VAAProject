@@ -30,6 +30,8 @@ website:
             href: Analysis/Forecasting.html
       - text: ShinyApp
         href: ShinyApp/ShinyApp.html
+      - text: Poster
+        href: Poster.html
 
     right:
       - about.qmd

@@ -31,8 +31,6 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
 <link href="./logo.png" rel="icon" type="image/png">
-<script src="site_libs/quarto-listing/list.min.js"></script>
-<script src="site_libs/quarto-listing/quarto-listing.js"></script>
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -69,65 +67,7 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
-<script>
 
-  window.document.addEventListener("DOMContentLoaded", function (_event) {
-    const listingTargetEl = window.document.querySelector('#listing-listing .list');
-    if (!listingTargetEl) {
-      // No listing discovered, do not attach.
-      return; 
-    }
-
-    const options = {
-      valueNames: ['listing-title','listing-author','listing-date','listing-image','listing-description',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
-      
-      searchColumns: ["listing-title","listing-author","listing-date","listing-image","listing-description"],
-    };
-
-    window['quarto-listings'] = window['quarto-listings'] || {};
-    window['quarto-listings']['listing-listing'] = new List('listing-listing', options);
-
-    if (window['quarto-listing-loaded']) {
-      window['quarto-listing-loaded']();
-    }
-  });
-
-  window.addEventListener('hashchange',() => {
-    if (window['quarto-listing-loaded']) {
-      window['quarto-listing-loaded']();
-    }
-  })
-  </script>
-
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
 
 </head>
 
@@ -201,6 +141,10 @@ window.Quarto = {
     <a class="nav-link" href="./ShinyApp/ShinyApp.html"> 
 <span class="menu-text">ShinyApp</span></a>
   </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./Poster.html"> 
+<span class="menu-text">Poster</span></a>
+  </li>  
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
@@ -244,127 +188,11 @@ window.Quarto = {
 <div class="column-screen">
 <p><img src="images/coverpage-01.png" class="img-fluid"></p>
 </div>
-<p>You may wish to explore our website in the following order:</p>
+<p>You may wish to explore our website in the following order: 31b8e172-b470-440e-83d8-e6b185028602:dAB5AHAAZQA6AFoAUQBBAHgAQQBEAGcAQQBNAFEAQQA1AEEARABZAEEATQBBAEEAMQBBAEMAMABBAE0AQQBCAGgAQQBHAE0AQQBaAEEAQQB0AEEARABRAEEAWgBnAEIAaABBAEcAVQBBAEwAUQBBADQAQQBHAEkAQQBPAFEAQQA1AEEAQwAwAEEATwBRAEIAagBBAEQARQBBAFkAZwBBADMAQQBHAEkAQQBaAEEAQQAzAEEARwBNAEEATQBBAEIAbQBBAEQARQBBAAoAcABvAHMAaQB0AGkAbwBuADoATQB3AEEAMABBAEQAawBBAAoAcAByAGUAZgBpAHgAOgAKAHMAbwB1AHIAYwBlADoATABRAEEAdABBAEMAMABBAEMAZwBCAHMAQQBHAGsAQQBjAHcAQgAwAEEARwBrAEEAYgBnAEIAbgBBAEQAbwBBAEMAZwBBAGcAQQBDAEEAQQBZAHcAQgB2AEEARwA0AEEAZABBAEIAbABBAEcANABBAGQAQQBCAHoAQQBEAG8AQQBJAEEAQQBnAEEAQwBBAEEASQBBAEEASwBBAEMAQQBBAEkAQQBBAGcAQQBDAEEAQQBMAFEAQQBnAEEAQwBJAEEAYQBRAEIAdQBBAEgAUQBBAGMAZwBCAHYAQQBHAFEAQQBkAFEAQgBqAEEASABRAEEAYQBRAEIAdgBBAEcANABBAEwAZwBCAHgAQQBHADAAQQBaAEEAQQBpAEEAQQBvAEEASQBBAEEAZwBBAEMAQQBBAEkAQQBBAHQAQQBDAEEAQQBJAGcAQgBCAEEARwA0AEEAWQBRAEIAcwBBAEgAawBBAGMAdwBCAHAAQQBIAE0AQQBMAHcAQgBFAEEARwBFAEEAZABBAEIAaABBAEgAQQBBAGMAZwBCAGwAQQBIAEEAQQBMAGcAQgB4AEEARwAwAEEAWgBBAEEAaQBBAEEAbwBBAEkAQQBBAGcAQQBDAEEAQQBJAEEAQQB0AEEAQwBBAEEASQBnAEIAQgBBAEcANABBAFkAUQBCAHMAQQBIAGsAQQBjAHcAQgBwAEEASABNAEEATAB3AEIARABBAEUAUQBBAFEAUQBBAHUAQQBIAEUAQQBiAFEAQgBrAEEAQwBJAEEAQwBnAEEAZwBBAEMAQQBBAEkAQQBBAGcAQQBDADAAQQBJAEEAQQBpAEEARQBFAEEAYgBnAEIAaABBAEcAdwBBAGUAUQBCAHoAQQBHAGsAQQBjAHcAQQB2AEEARQBZAEEAYgB3AEIAeQBBAEcAVQBBAFkAdwBCAGgAQQBIAE0AQQBkAEEAQgBwAEEARwA0AEEAWgB3AEEAdQBBAEgARQBBAGIAUQBCAGsAQQBDAEkAQQBDAGcAQQBnAEEAQwBBAEEASQBBAEEAZwBBAEMAMABBAEkAQQBBAGkAQQBGAE0AQQBhAEEAQgBwAEEARwA0AEEAZQBRAEIAQgBBAEgAQQBBAGMAQQBBAHYAQQBGAE0AQQBhAEEAQgBwAEEARwA0AEEAZQBRAEIAQgBBAEgAQQBBAGMAQQBBAHUAQQBIAEUAQQBiAFEAQgBrAEEAQwBJAEEAQwBnAEEAZwBBAEMAQQBBAGMAdwBCAHYAQQBIAEkAQQBkAEEAQQA2AEEAQwBBAEEAWgBnAEIAaABBAEcAdwBBAGMAdwBCAGwAQQBBAG8AQQBJAEEAQQBnAEEASABRAEEAZQBRAEIAdwBBAEcAVQBBAE8AZwBBAGcAQQBHAGMAQQBjAGcAQgBwAEEARwBRAEEAQwBnAEEAdABBAEMAMABBAEwAUQBBAD0ACgBzAHUAZgBmAGkAeAA6AA==:31b8e172-b470-440e-83d8-e6b185028602</p>
 
 
 
-
-<div class="quarto-listing quarto-listing-container-grid" id="listing-listing">
-<div class="list grid quarto-listing-cols-3">
-<div class="g-col-1" data-index="0" data-listing-file-modified-sort="1711794185373" data-listing-reading-time-sort="2" data-listing-word-count-sort="393">
-<a href="./introduction.html" class="quarto-grid-link">
-<div class="quarto-grid-item card h-100 card-left">
-<p class="card-img-top"><img src="images\clipboard-939414320.png" style="height: 150px;"  class="thumbnail-image card-img"/></p>
-<div class="card-body post-contents">
-<h5 class="no-anchor card-title listing-title">
-Rain or Shine: Unveiling The Mysteries of Singapore Weather
-</h5>
-<div class="card-text listing-description">
-As a small, low-lying city-state, Singapore is vulnerable to the effects of climate change which has brought about more extreme weather patterns - rising sea levels, dry…
-</div>
-<div class="card-attribution card-text-small start">
-<div class="listing-author">
-
-</div>
-</div>
-</div>
-</div>
-</a>
-</div>
-<div class="g-col-1" data-index="1" data-listing-date-sort="1709222400000" data-listing-file-modified-sort="1711802170775" data-listing-date-modified-sort="1711802170000" data-listing-reading-time-sort="3" data-listing-word-count-sort="471">
-<a href="./Analysis/Dataprep.html" class="quarto-grid-link">
-<div class="quarto-grid-item card h-100 card-left">
-<div class="listing-item-img-placeholder card-img-top" style="height: 150px;">&nbsp;</div>
-<div class="card-body post-contents">
-<h5 class="no-anchor card-title listing-title">
-Data Preparation
-</h5>
-<div class="card-text listing-description">
-We used historical daily weather records from weather.gov.sg, and retrieved the daily records data from Jan 1980 to Dec 2023 via data.gov.sg’s API. The daily historical…
-</div>
-<div class="card-attribution card-text-small justify">
-<div class="listing-author">
-
-</div>
-<div class="listing-date">
-Mar 1, 2024
-</div>
-</div>
-</div>
-</div>
-</a>
-</div>
-<div class="g-col-1" data-index="2" data-listing-date-sort="1709222400000" data-listing-file-modified-sort="1711803741190" data-listing-date-modified-sort="1711803741000" data-listing-reading-time-sort="44" data-listing-word-count-sort="8718">
-<a href="./Analysis/CDA.html" class="quarto-grid-link">
-<div class="quarto-grid-item card h-100 card-left">
-<p class="card-img-top"><img src="Analysis\CDA_files\figure-html\unnamed-chunk-9-1.png" style="height: 150px;"  class="thumbnail-image card-img"/></p>
-<div class="card-body post-contents">
-<h5 class="no-anchor card-title listing-title">
-Confirmatory Data Analysis
-</h5>
-<div class="card-text listing-description">
-The group’s Confirmatory Data Analysis seeks to address the following issues:
-</div>
-<div class="card-attribution card-text-small justify">
-<div class="listing-author">
-
-</div>
-<div class="listing-date">
-Mar 1, 2024
-</div>
-</div>
-</div>
-</div>
-</a>
-</div>
-<div class="g-col-1" data-index="3" data-listing-date-sort="1710604800000" data-listing-file-modified-sort="1711804278281" data-listing-date-modified-sort="1711804278000" data-listing-reading-time-sort="8" data-listing-word-count-sort="1554">
-<a href="./Analysis/Forecasting.html" class="quarto-grid-link">
-<div class="quarto-grid-item card h-100 card-left">
-<div class="listing-item-img-placeholder card-img-top" style="height: 150px;">&nbsp;</div>
-<div class="card-body post-contents">
-<h5 class="no-anchor card-title listing-title">
-Forecasting
-</h5>
-<div class="card-text listing-description">
-To carry out decomposition of time series data
-</div>
-<div class="card-attribution card-text-small justify">
-<div class="listing-author">
-
-</div>
-<div class="listing-date">
-Mar 17, 2024
-</div>
-</div>
-</div>
-</div>
-</a>
-</div>
-<div class="g-col-1" data-index="4" data-listing-file-modified-sort="1711810955021" data-listing-reading-time-sort="1" data-listing-word-count-sort="44">
-<a href="./ShinyApp/ShinyApp.html" class="quarto-grid-link">
-<div class="quarto-grid-item card h-100 card-left">
-<p class="card-img-top"><img src="shinyapp.png" style="height: 150px;"  class="thumbnail-image card-img"/></p>
-<div class="card-body post-contents">
-<h5 class="no-anchor card-title listing-title">
-Shiny Application
-</h5>
-<div class="card-text listing-description">
-Click on the link below for our Shiny Application:
-</div>
-<div class="card-attribution card-text-small start">
-<div class="listing-author">
-
-</div>
-</div>
-</div>
-</div>
-</a>
-</div>
-</div>
-<div class="listing-no-matching d-none">
-No matching items
-</div>
-</div></main> <!-- /main -->
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
