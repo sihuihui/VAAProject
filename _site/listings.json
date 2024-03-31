@@ -4,6 +4,7 @@
     "items": [
       "/introduction.html",
       "/Analysis/Dataprep.html",
+      "/Analysis/EDA.html",
       "/Analysis/CDA.html",
       "/Analysis/Forecasting.html",
       "/ShinyApp/ShinyApp.html"
