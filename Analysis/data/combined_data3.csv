@@ -1,0 +1,391 @@
+station,year,temperature_type,value
+Admiralty,2014,meantemp,27.68709677419355
+Admiralty,2015,meantemp,28.145806451612906
+Admiralty,2016,meantemp,28.15
+Admiralty,2017,meantemp,27.59834389400922
+Admiralty,2018,meantemp,27.656989247311827
+Admiralty,2019,meantemp,28.21483870967742
+Admiralty,2020,meantemp,27.843763440860215
+Admiralty,2021,meantemp,27.512857142857143
+Admiralty,2022,meantemp,27.53333333333333
+Admiralty,2023,meantemp,28.04
+Ang Mo Kio,2014,meantemp,27.72427419354839
+Ang Mo Kio,2015,meantemp,28.206021505376345
+Ang Mo Kio,2016,meantemp,28.3744623655914
+Ang Mo Kio,2017,meantemp,27.936666666666667
+Ang Mo Kio,2018,meantemp,27.77532258064516
+Ang Mo Kio,2019,meantemp,28.5205376344086
+Ang Mo Kio,2020,meantemp,28.125752688172042
+Ang Mo Kio,2021,meantemp,27.96252688172043
+Ang Mo Kio,2022,meantemp,27.761785714285715
+Ang Mo Kio,2023,meantemp,28.538602150537635
+Changi,2014,meantemp,28.081129032258065
+Changi,2015,meantemp,28.5
+Changi,2016,meantemp,28.370967741935484
+Changi,2017,meantemp,27.833655913978493
+Changi,2018,meantemp,27.97048387096774
+Changi,2019,meantemp,28.533333333333335
+Changi,2020,meantemp,28.034139784946237
+Changi,2021,meantemp,28.08295698924731
+Changi,2022,meantemp,27.926666666666666
+Changi,2023,meantemp,28.611989247311826
+Choa Chu Kang (South),2014,meantemp,27.90822580645161
+Choa Chu Kang (South),2015,meantemp,27.929032258064517
+Choa Chu Kang (South),2016,meantemp,28.064677419354837
+Choa Chu Kang (South),2017,meantemp,28.02790322580645
+Choa Chu Kang (South),2018,meantemp,27.623763440860216
+Choa Chu Kang (South),2019,meantemp,28.276309523809523
+Choa Chu Kang (South),2020,meantemp,27.841954022988507
+Choa Chu Kang (South),2021,meantemp,27.564285714285713
+Choa Chu Kang (South),2022,meantemp,27.543172043010753
+Choa Chu Kang (South),2023,meantemp,28.185591397849464
+Clementi,2014,meantemp,27.64682795698925
+Clementi,2015,meantemp,27.77698924731183
+Clementi,2016,meantemp,28.15753176930596
+Clementi,2017,meantemp,28.016695992179862
+Clementi,2018,meantemp,28.037327188940093
+Clementi,2019,meantemp,28.22833333333333
+Clementi,2020,meantemp,27.830430107526883
+Clementi,2021,meantemp,27.53333333333333
+Clementi,2022,meantemp,27.545
+Clementi,2023,meantemp,28.077903225806452
+East Coast Parkway,2014,meantemp,27.97471198156682
+East Coast Parkway,2015,meantemp,28.421827956989247
+East Coast Parkway,2016,meantemp,28.682419354838707
+East Coast Parkway,2017,meantemp,28.27940860215054
+East Coast Parkway,2018,meantemp,28.17693548387097
+East Coast Parkway,2019,meantemp,28.38700716845878
+East Coast Parkway,2020,meantemp,28.17741935483871
+East Coast Parkway,2021,meantemp,28.205
+East Coast Parkway,2022,meantemp,28.386290322580646
+East Coast Parkway,2023,meantemp,28.985
+Jurong (West),2014,meantemp,27.20967741935484
+Jurong (West),2015,meantemp,27.96451612903226
+Jurong (West),2016,meantemp,27.870752688172043
+Jurong (West),2017,meantemp,27.040209567698046
+Jurong (West),2018,meantemp,27.31661866359447
+Jurong (West),2019,meantemp,27.991666666666667
+Jurong (West),2020,meantemp,27.570967741935483
+Jurong (West),2021,meantemp,27.321129032258064
+Jurong (West),2022,meantemp,27.345
+Jurong (West),2023,meantemp,28.09
+Jurong Island,2014,meantemp,28.81241935483871
+Jurong Island,2015,meantemp,28.581612903225807
+Jurong Island,2016,meantemp,28.19532258064516
+Jurong Island,2017,meantemp,28.34263440860215
+Jurong Island,2018,meantemp,28.17677419354839
+Jurong Island,2019,meantemp,28.722261904761904
+Jurong Island,2020,meantemp,28.387096774193548
+Jurong Island,2021,meantemp,28.178287250384024
+Jurong Island,2022,meantemp,27.975
+Jurong Island,2023,meantemp,28.571827956989246
+Newton,2014,meantemp,27.79806451612903
+Newton,2015,meantemp,28.04456989247312
+Newton,2016,meantemp,27.880645161290325
+Newton,2017,meantemp,27.31527777777778
+Newton,2018,meantemp,27.53510752688172
+Newton,2019,meantemp,28.085
+Newton,2020,meantemp,27.679166666666667
+Newton,2021,meantemp,27.550833333333333
+Newton,2022,meantemp,27.502000000000002
+Newton,2023,meantemp,28.049999999999997
+Pasir Panjang,2014,meantemp,28.34491935483871
+Pasir Panjang,2015,meantemp,28.706612903225807
+Pasir Panjang,2016,meantemp,28.864139784946236
+Pasir Panjang,2017,meantemp,28.373333333333335
+Pasir Panjang,2018,meantemp,28.26059139784946
+Pasir Panjang,2019,meantemp,28.80139784946237
+Pasir Panjang,2020,meantemp,28.27741935483871
+Pasir Panjang,2021,meantemp,27.894032258064517
+Pasir Panjang,2022,meantemp,28.191666666666666
+Pasir Panjang,2023,meantemp,28.833924731182798
+Sentosa Island,2014,meantemp,28.08220430107527
+Sentosa Island,2015,meantemp,28.341182795698924
+Sentosa Island,2016,meantemp,28.49268817204301
+Sentosa Island,2017,meantemp,28.13763440860215
+Sentosa Island,2018,meantemp,28.228763440860213
+Sentosa Island,2019,meantemp,28.705
+Sentosa Island,2020,meantemp,28.433954393770854
+Sentosa Island,2021,meantemp,28.45591397849462
+Sentosa Island,2022,meantemp,28.11268817204301
+Sentosa Island,2023,meantemp,28.49440860215054
+Tai Seng,2014,meantemp,28.51279569892473
+Tai Seng,2015,meantemp,28.83811827956989
+Tai Seng,2016,meantemp,28.98225806451613
+Tai Seng,2017,meantemp,28.54236559139785
+Tai Seng,2018,meantemp,28.450698924731185
+Tai Seng,2019,meantemp,28.91731182795699
+Tai Seng,2020,meantemp,28.60333333333333
+Tai Seng,2021,meantemp,28.435752688172045
+Tai Seng,2022,meantemp,28.251129032258063
+Tai Seng,2023,meantemp,28.781720430107526
+Tuas South,2014,meantemp,28.212204301075268
+Tuas South,2015,meantemp,28.2875
+Tuas South,2016,meantemp,28.87043010752688
+Tuas South,2017,meantemp,28.128666666666668
+Tuas South,2018,meantemp,28.245430107526882
+Tuas South,2019,meantemp,29.016720430107526
+Tuas South,2020,meantemp,28.332925472747498
+Tuas South,2021,meantemp,28.041182795698923
+Tuas South,2022,meantemp,28.03333333333333
+Tuas South,2023,meantemp,28.56709677419355
+Admiralty,2014,maxtemp,28.300000000000004
+Admiralty,2015,maxtemp,27.900000000000002
+Admiralty,2016,maxtemp,28.400000000000002
+Admiralty,2017,maxtemp,28.000000000000004
+Admiralty,2018,maxtemp,28.400000000000002
+Admiralty,2019,maxtemp,27.900000000000002
+Admiralty,2020,maxtemp,28.300000000000004
+Admiralty,2021,maxtemp,28.100000000000005
+Admiralty,2022,maxtemp,28.100000000000005
+Admiralty,2023,maxtemp,28.500000000000004
+Ang Mo Kio,2014,maxtemp,28.600000000000005
+Ang Mo Kio,2015,maxtemp,28.300000000000004
+Ang Mo Kio,2016,maxtemp,28.600000000000005
+Ang Mo Kio,2017,maxtemp,28.400000000000002
+Ang Mo Kio,2018,maxtemp,28.57675603482872
+Ang Mo Kio,2019,maxtemp,28.200000000000003
+Ang Mo Kio,2020,maxtemp,28.500000000000004
+Ang Mo Kio,2021,maxtemp,28.500000000000004
+Ang Mo Kio,2022,maxtemp,28.300000000000004
+Ang Mo Kio,2023,maxtemp,29.000000000000004
+Changi,2014,maxtemp,28.400000000000002
+Changi,2015,maxtemp,28.400000000000002
+Changi,2016,maxtemp,28.400000000000002
+Changi,2017,maxtemp,28.200000000000003
+Changi,2018,maxtemp,28.300000000000004
+Changi,2019,maxtemp,28.400000000000002
+Changi,2020,maxtemp,28.600000000000005
+Changi,2021,maxtemp,28.200000000000003
+Changi,2022,maxtemp,28.300000000000004
+Changi,2023,maxtemp,29.000000000000004
+Choa Chu Kang (South),2014,maxtemp,28.200000000000003
+Choa Chu Kang (South),2015,maxtemp,27.500000000000004
+Choa Chu Kang (South),2016,maxtemp,27.700000000000003
+Choa Chu Kang (South),2017,maxtemp,27.700000000000003
+Choa Chu Kang (South),2018,maxtemp,28.000000000000004
+Choa Chu Kang (South),2019,maxtemp,27.600000000000005
+Choa Chu Kang (South),2020,maxtemp,28.500000000000004
+Choa Chu Kang (South),2021,maxtemp,28.200000000000003
+Choa Chu Kang (South),2022,maxtemp,28.000000000000004
+Choa Chu Kang (South),2023,maxtemp,28.500000000000004
+Clementi,2014,maxtemp,28.000000000000004
+Clementi,2015,maxtemp,27.800000000000008
+Clementi,2016,maxtemp,28.100000000000005
+Clementi,2017,maxtemp,27.700000000000003
+Clementi,2018,maxtemp,28.200000000000003
+Clementi,2019,maxtemp,27.800000000000008
+Clementi,2020,maxtemp,28.000000000000004
+Clementi,2021,maxtemp,28.000000000000004
+Clementi,2022,maxtemp,27.800000000000008
+Clementi,2023,maxtemp,28.500000000000004
+East Coast Parkway,2014,maxtemp,29.200000000000003
+East Coast Parkway,2015,maxtemp,29.000000000000004
+East Coast Parkway,2016,maxtemp,29.300000000000008
+East Coast Parkway,2017,maxtemp,29.300000000000008
+East Coast Parkway,2018,maxtemp,29.400000000000002
+East Coast Parkway,2019,maxtemp,28.62249660894711
+East Coast Parkway,2020,maxtemp,29.300000000000008
+East Coast Parkway,2021,maxtemp,29.100000000000005
+East Coast Parkway,2022,maxtemp,29.500000000000004
+East Coast Parkway,2023,maxtemp,29.700000000000003
+Jurong (West),2014,maxtemp,27.000000000000004
+Jurong (West),2015,maxtemp,28.000000000000004
+Jurong (West),2016,maxtemp,28.400000000000002
+Jurong (West),2017,maxtemp,27.500000000000004
+Jurong (West),2018,maxtemp,28.500000000000004
+Jurong (West),2019,maxtemp,28.100000000000005
+Jurong (West),2020,maxtemp,28.200000000000003
+Jurong (West),2021,maxtemp,28.400000000000002
+Jurong (West),2022,maxtemp,28.100000000000005
+Jurong (West),2023,maxtemp,28.700000000000003
+Jurong Island,2014,maxtemp,28.700000000000003
+Jurong Island,2015,maxtemp,28.800000000000008
+Jurong Island,2016,maxtemp,29.000000000000004
+Jurong Island,2017,maxtemp,28.600000000000005
+Jurong Island,2018,maxtemp,28.800000000000008
+Jurong Island,2019,maxtemp,28.800000000000008
+Jurong Island,2020,maxtemp,28.900000000000002
+Jurong Island,2021,maxtemp,28.800000000000008
+Jurong Island,2022,maxtemp,28.600000000000005
+Jurong Island,2023,maxtemp,28.600000000000005
+Newton,2014,maxtemp,28.400000000000002
+Newton,2015,maxtemp,28.100000000000005
+Newton,2016,maxtemp,28.200000000000003
+Newton,2017,maxtemp,27.700000000000003
+Newton,2018,maxtemp,28.100000000000005
+Newton,2019,maxtemp,28.000000000000004
+Newton,2020,maxtemp,27.600000000000005
+Newton,2021,maxtemp,28.300000000000004
+Newton,2022,maxtemp,28.100000000000005
+Newton,2023,maxtemp,28.500000000000004
+Pasir Panjang,2014,maxtemp,29.400000000000002
+Pasir Panjang,2015,maxtemp,29.100000000000005
+Pasir Panjang,2016,maxtemp,29.400000000000002
+Pasir Panjang,2017,maxtemp,29.200000000000003
+Pasir Panjang,2018,maxtemp,29.400000000000002
+Pasir Panjang,2019,maxtemp,29.100000000000005
+Pasir Panjang,2020,maxtemp,29.300000000000008
+Pasir Panjang,2021,maxtemp,29.200000000000003
+Pasir Panjang,2022,maxtemp,29.100000000000005
+Pasir Panjang,2023,maxtemp,29.300000000000008
+Sentosa Island,2014,maxtemp,28.400000000000002
+Sentosa Island,2015,maxtemp,28.100000000000005
+Sentosa Island,2016,maxtemp,28.600000000000005
+Sentosa Island,2017,maxtemp,28.167631043160654
+Sentosa Island,2018,maxtemp,28.300000000000004
+Sentosa Island,2019,maxtemp,28.800000000000008
+Sentosa Island,2020,maxtemp,28.200000000000003
+Sentosa Island,2021,maxtemp,29.000000000000004
+Sentosa Island,2022,maxtemp,28.700000000000003
+Sentosa Island,2023,maxtemp,28.600000000000005
+Tai Seng,2014,maxtemp,29.400000000000002
+Tai Seng,2015,maxtemp,29.000000000000004
+Tai Seng,2016,maxtemp,29.300000000000008
+Tai Seng,2017,maxtemp,29.075471130573842
+Tai Seng,2018,maxtemp,29.200000000000003
+Tai Seng,2019,maxtemp,28.800000000000008
+Tai Seng,2020,maxtemp,29.000000000000004
+Tai Seng,2021,maxtemp,29.000000000000004
+Tai Seng,2022,maxtemp,28.600000000000005
+Tai Seng,2023,maxtemp,29.100000000000005
+Tuas South,2014,maxtemp,28.800000000000008
+Tuas South,2015,maxtemp,28.800000000000008
+Tuas South,2016,maxtemp,28.900000000000002
+Tuas South,2017,maxtemp,28.200000000000003
+Tuas South,2018,maxtemp,28.500000000000004
+Tuas South,2019,maxtemp,28.400000000000002
+Tuas South,2020,maxtemp,28.600000000000005
+Tuas South,2021,maxtemp,28.844390808385736
+Tuas South,2022,maxtemp,28.900000000000002
+Tuas South,2023,maxtemp,29.000000000000004
+Admiralty,2014,mintemp,21.700000000000003
+Admiralty,2015,mintemp,22.200000000000003
+Admiralty,2016,mintemp,21.900000000000002
+Admiralty,2017,mintemp,22.1
+Admiralty,2018,mintemp,21.500000000000004
+Admiralty,2019,mintemp,21.4
+Admiralty,2020,mintemp,21.4
+Admiralty,2021,mintemp,21.4
+Admiralty,2022,mintemp,21.6
+Admiralty,2023,mintemp,21.6
+Ang Mo Kio,2014,mintemp,21.4
+Ang Mo Kio,2015,mintemp,21.700000000000003
+Ang Mo Kio,2016,mintemp,21.199999999999996
+Ang Mo Kio,2017,mintemp,22.400000000000002
+Ang Mo Kio,2018,mintemp,21.299999999999997
+Ang Mo Kio,2019,mintemp,21.500000000000004
+Ang Mo Kio,2020,mintemp,22.000000000000004
+Ang Mo Kio,2021,mintemp,21.500000000000004
+Ang Mo Kio,2022,mintemp,22.200000000000003
+Ang Mo Kio,2023,mintemp,21.6
+Changi,2014,mintemp,21.099999999999998
+Changi,2015,mintemp,21.900000000000002
+Changi,2016,mintemp,21.6
+Changi,2017,mintemp,21.800000000000004
+Changi,2018,mintemp,21.299999999999997
+Changi,2019,mintemp,21.900000000000002
+Changi,2020,mintemp,21.900000000000002
+Changi,2021,mintemp,21.700000000000003
+Changi,2022,mintemp,22.200000000000003
+Changi,2023,mintemp,21.700000000000003
+Choa Chu Kang (South),2014,mintemp,21.500000000000004
+Choa Chu Kang (South),2015,mintemp,21.800000000000004
+Choa Chu Kang (South),2016,mintemp,22.1
+Choa Chu Kang (South),2017,mintemp,22.400000000000002
+Choa Chu Kang (South),2018,mintemp,21.199999999999996
+Choa Chu Kang (South),2019,mintemp,22.000000000000004
+Choa Chu Kang (South),2020,mintemp,21.500000000000004
+Choa Chu Kang (South),2021,mintemp,21.6
+Choa Chu Kang (South),2022,mintemp,21.900000000000002
+Choa Chu Kang (South),2023,mintemp,21.700000000000003
+Clementi,2014,mintemp,21.800000000000004
+Clementi,2015,mintemp,21.6
+Clementi,2016,mintemp,21.299999999999997
+Clementi,2017,mintemp,22.1
+Clementi,2018,mintemp,21.099999999999998
+Clementi,2019,mintemp,21.500000000000004
+Clementi,2020,mintemp,21.500000000000004
+Clementi,2021,mintemp,21.4
+Clementi,2022,mintemp,21.4
+Clementi,2023,mintemp,21.299999999999997
+East Coast Parkway,2014,mintemp,21.099999999999998
+East Coast Parkway,2015,mintemp,22.1
+East Coast Parkway,2016,mintemp,22.400000000000002
+East Coast Parkway,2017,mintemp,22.600000000000005
+East Coast Parkway,2018,mintemp,22.1
+East Coast Parkway,2019,mintemp,23.2
+East Coast Parkway,2020,mintemp,22.000000000000004
+East Coast Parkway,2021,mintemp,21.6
+East Coast Parkway,2022,mintemp,22.799999999999997
+East Coast Parkway,2023,mintemp,22.38607694520702
+Jurong (West),2014,mintemp,20.8
+Jurong (West),2015,mintemp,21.588494233094064
+Jurong (West),2016,mintemp,21.700000000000003
+Jurong (West),2017,mintemp,22.199441086976947
+Jurong (West),2018,mintemp,20.900000000000002
+Jurong (West),2019,mintemp,21.6
+Jurong (West),2020,mintemp,21.4
+Jurong (West),2021,mintemp,21.6
+Jurong (West),2022,mintemp,20.399999999999995
+Jurong (West),2023,mintemp,21.6
+Jurong Island,2014,mintemp,21.4
+Jurong Island,2015,mintemp,22.48822148631629
+Jurong Island,2016,mintemp,22.499999999999996
+Jurong Island,2017,mintemp,22.1
+Jurong Island,2018,mintemp,22.000000000000004
+Jurong Island,2019,mintemp,22.1
+Jurong Island,2020,mintemp,21.900000000000002
+Jurong Island,2021,mintemp,22.400000000000002
+Jurong Island,2022,mintemp,22.200000000000003
+Jurong Island,2023,mintemp,21.700000000000003
+Newton,2014,mintemp,22.000000000000004
+Newton,2015,mintemp,21.800000000000004
+Newton,2016,mintemp,22.200000000000003
+Newton,2017,mintemp,22.400000000000002
+Newton,2018,mintemp,21.299999999999997
+Newton,2019,mintemp,21.900000000000002
+Newton,2020,mintemp,22.499999999999996
+Newton,2021,mintemp,21.900000000000002
+Newton,2022,mintemp,21.898166867121322
+Newton,2023,mintemp,21.099999999999998
+Pasir Panjang,2014,mintemp,22.200000000000003
+Pasir Panjang,2015,mintemp,22.499999999999996
+Pasir Panjang,2016,mintemp,21.800000000000004
+Pasir Panjang,2017,mintemp,22.600000000000005
+Pasir Panjang,2018,mintemp,22.000000000000004
+Pasir Panjang,2019,mintemp,21.099999999999998
+Pasir Panjang,2020,mintemp,22.600000000000005
+Pasir Panjang,2021,mintemp,21.800000000000004
+Pasir Panjang,2022,mintemp,22.400000000000002
+Pasir Panjang,2023,mintemp,21.500000000000004
+Sentosa Island,2014,mintemp,21.500000000000004
+Sentosa Island,2015,mintemp,22.300000000000004
+Sentosa Island,2016,mintemp,22.000000000000004
+Sentosa Island,2017,mintemp,23.06039162653989
+Sentosa Island,2018,mintemp,22.1
+Sentosa Island,2019,mintemp,21.900000000000002
+Sentosa Island,2020,mintemp,22.200000000000003
+Sentosa Island,2021,mintemp,22.9
+Sentosa Island,2022,mintemp,22.300000000000004
+Sentosa Island,2023,mintemp,22.1
+Tai Seng,2014,mintemp,21.900000000000002
+Tai Seng,2015,mintemp,22.000000000000004
+Tai Seng,2016,mintemp,22.300000000000004
+Tai Seng,2017,mintemp,21.700000000000003
+Tai Seng,2018,mintemp,21.700000000000003
+Tai Seng,2019,mintemp,22.200000000000003
+Tai Seng,2020,mintemp,22.000000000000004
+Tai Seng,2021,mintemp,21.900000000000002
+Tai Seng,2022,mintemp,22.300000000000004
+Tai Seng,2023,mintemp,21.700000000000003
+Tuas South,2014,mintemp,21.700000000000003
+Tuas South,2015,mintemp,22.600000000000005
+Tuas South,2016,mintemp,23.000000000000004
+Tuas South,2017,mintemp,23.000000000000004
+Tuas South,2018,mintemp,22.600000000000005
+Tuas South,2019,mintemp,23.100000000000005
+Tuas South,2020,mintemp,22.200000000000003
+Tuas South,2021,mintemp,22.1
+Tuas South,2022,mintemp,22.1
+Tuas South,2023,mintemp,21.700000000000003
